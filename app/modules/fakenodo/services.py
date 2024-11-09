@@ -1,11 +1,16 @@
 import logging
+import hashlib
+import os
 
 from dotenv import load_dotenv
 from app.modules.fakenodo.repositories import DepositionRepo
+from app.modules.fakenodo.models import Deposition
 from app.modules.dataset.models import DataSet
 from app.modules.featuremodel.models import FeatureModel
 
+from core.configuration.configuration import uploads_folder_name
 from core.services.BaseService import BaseService
+from flask.logging import current_user
 
 logger = logging.getLogger(__name__)
 
@@ -77,3 +82,88 @@ class FakenodoService(BaseService):
         Returns:
             dict: The response in JSON format with the details of the uploaded file.
         """
+
+        uvl_filename = feature_model.fm_meta_data.uvl_filename
+        user_id = current_user.id if user is None else user.id
+        file_path = os.path.join(uploads_folder_name(), f"user_{str(user_id)}", f"dataset_{dataset.id}/", uvl_filename)
+
+        request = {
+            "id": deposition_id,
+            "file": uvl_filename,
+            "fileSize": os.path.getsize(file_path),
+            "checksum": checksum(file_path),
+            "message": f"File Uploaded to deposition with id {deposition_id}"
+        }
+
+        return request
+
+    def publish_deposition(self, deposition_id: int) -> dict:
+        """
+        Publish a deposition in Fakenodo.
+
+        Args:
+            deposition_id (int): The ID of the deposition in Fakenodo.
+
+        Returns:
+            dict: The response in JSON format with the details of the published deposition.
+        """
+
+        deposition = Deposition.query.get(deposition_id)
+        if not deposition:
+            raise Exception("Error 404: Deposition not found")
+
+        try:
+            deposition.doi = f"fakenodo.doi.{deposition_id}"
+            deposition.status = "published"
+            self.deposition_repository.update(deposition)
+
+            response = {
+                "id": deposition_id,
+                "status": "published",
+                "conceptdoi": f"fakenodo.doi.{deposition_id}",
+                "message": "Deposition published successfully in fakenodo."
+            }
+            return response
+
+        except Exception as error:
+            raise Exception(f"Failed to publish deposition with errors: {str(error)}")
+
+    def get_deposition(self, deposition_id: int) -> dict:
+        """
+        Get a deposition from Fakenodo.
+
+        Args:
+            deposition_id (int): The ID of the deposition in Fakenodo.
+
+        Returns:
+            dict: The response in JSON format with the details of the deposition.
+        """
+        deposition = Deposition.query.get(deposition_id)
+        if not deposition:
+            raise Exception("Deposition not found")
+
+        response = {
+            "id": deposition.id,
+            "doi": deposition.doi,
+            "metadata": deposition.dep_metadata,
+            "status": deposition.status,
+            "message": "Deposition succesfully get from Fakenodo."
+        }
+        return response
+
+    def get_doi(self, deposition_id: int) -> str:
+        """
+        Get the DOI of a deposition from Fakenodo.
+
+        Args:
+            deposition_id (int): The ID of the deposition in Fakenodo.
+
+        Returns:
+            str: The DOI of the deposition.
+        """
+        return self.get_deposition(deposition_id).get("doi")
+
+
+def checksum(fileName):
+    res = hashlib.md5("example string").hexdigest()
+    return res
