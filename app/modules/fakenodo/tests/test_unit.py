@@ -5,13 +5,28 @@ from app.modules.fakenodo.services import FakenodoService, checksum
 from app.modules.fakenodo.models import Deposition
 from app.modules.dataset.models import DataSet
 from app.modules.featuremodel.models import FeatureModel
-from app import create_app
-from app import db
+from app import create_app, db
 
 
 @pytest.fixture
 def fakenodo_service():
     return FakenodoService()
+
+
+@pytest.fixture
+def app():
+    app = create_app()
+    app.config.update({
+        "TESTING": True,
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # In-memory database for tests
+    })
+
+    with app.app_context():
+        # Create all tables in the in-memory SQLite database
+        db.create_all()
+        yield app
+        db.session.remove()
+        db.drop_all()
 
 
 @pytest.fixture
@@ -23,17 +38,6 @@ def setup_deposition(app):
         yield deposition
         db.session.delete(deposition)
         db.session.commit()
-       
-          
-@pytest.fixture
-def app():
-    app = create_app()
-    app.config.update({
-        "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # In-memory database for tests
-    })
-    with app.app_context():
-        yield app
 
 
 def test_create_new_deposition(fakenodo_service, app):
@@ -65,7 +69,7 @@ def test_upload_file(fakenodo_service, app):
         mock_user.id = 1
 
         # Mock file size and checksum calculation
-        with patch("os.path.getsize", return_value=100), patch("app.modules.fakenodo.services.checksum", 
+        with patch("os.path.getsize", return_value=100), patch("app.modules.fakenodo.services.checksum",
                                                                return_value="mocked_checksum"):
             result = fakenodo_service.upload_file(mock_dataset, 1, mock_feature_model, user=mock_user)
             assert result["id"] == 1
