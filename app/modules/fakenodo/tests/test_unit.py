@@ -7,6 +7,7 @@ from app.modules.dataset.models import DataSet
 from app.modules.featuremodel.models import FeatureModel
 from app import create_app
 from app import db
+from sqlalchemy import inspect
 
 
 @pytest.fixture
@@ -30,10 +31,14 @@ def app():
     app = create_app()
     app.config.update({
         "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # In-memory database for tests
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:", 
     })
     with app.app_context():
+        inspector = inspect(db.engine)
+        if "deposition" not in inspector.get_table_names():
+            Deposition.__table__.create(db.engine)  
         yield app
+        Deposition.__table__.drop(db.engine)
 
 
 def test_create_new_deposition(fakenodo_service, app):
@@ -46,7 +51,6 @@ def test_create_new_deposition(fakenodo_service, app):
                                                        orcid="0000-0000")]
         mock_dataset.ds_meta_data.tags = "test, dataset"
 
-        # Mock repository method
         with patch.object(fakenodo_service.deposition_repository, 'create_new_deposition', 
                           return_value=Deposition(id=1)) as mock_create:
             result = fakenodo_service.create_new_deposition(mock_dataset)
@@ -64,7 +68,6 @@ def test_upload_file(fakenodo_service, app):
         mock_user = MagicMock()
         mock_user.id = 1
 
-        # Mock file size and checksum calculation
         with patch("os.path.getsize", return_value=100), patch("app.modules.fakenodo.services.checksum", 
                                                                return_value="mocked_checksum"):
             result = fakenodo_service.upload_file(mock_dataset, 1, mock_feature_model, user=mock_user)
@@ -94,8 +97,7 @@ def test_get_doi(fakenodo_service, app):
         mock_deposition = MagicMock(spec=Deposition)
         mock_deposition.id = 1
         mock_deposition.doi = "fakenodo.doi.1"
-
-        # Patch the `get_deposition` method to return the mock deposition
+        
         with patch.object(fakenodo_service, 'get_deposition', return_value={"doi": "fakenodo.doi.1"}):
             result = fakenodo_service.get_doi(1)
             assert result == "fakenodo.doi.1"
