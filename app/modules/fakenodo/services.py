@@ -10,7 +10,7 @@ from app.modules.featuremodel.models import FeatureModel
 
 from core.configuration.configuration import uploads_folder_name
 from core.services.BaseService import BaseService
-from flask.logging import current_user
+from flask_login import current_user
 
 logger = logging.getLogger(__name__)
 
