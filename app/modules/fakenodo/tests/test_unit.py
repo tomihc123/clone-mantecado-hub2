@@ -9,6 +9,7 @@ from app import create_app
 from app import db
 from sqlalchemy import inspect
 
+
 @pytest.fixture
 def fakenodo_service():
     return FakenodoService()
