@@ -165,5 +165,12 @@ class FakenodoService(BaseService):
 
 
 def checksum(fileName):
-    res = hashlib.md5("example string").hexdigest()
-    return res
+    try:
+        with open(fileName, "rb") as file:
+            file_content = file.read()
+            res = hashlib.md5(file_content).hexdigest()
+        return res
+    except FileNotFoundError:
+        raise Exception(f"File {fileName} not found for checksum calculation")
+    except Exception as e:
+        raise Exception(f"Error calculating checksum for file {fileName}: {str(e)}")
