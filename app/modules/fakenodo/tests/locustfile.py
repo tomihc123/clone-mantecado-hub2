@@ -5,15 +5,13 @@ from core.environment.host import get_host_for_locust_testing
 
 class DepositionBehavior(TaskSet):
     def on_start(self):
-        # Optional: login or setup preconditions here
         pass
 
     @task
     def create_deposition(self):
-        response = self.client.get("/depositions/create")  # Adjust URL as needed
+        response = self.client.get("/depositions/create")
         csrf_token = get_csrf_token(response)
         
-        # Payload for creating a new deposition
         response = self.client.post("/depositions/create", data={
             "title": fake.sentence(nb_words=6),
             "description": fake.text(),
@@ -26,8 +24,7 @@ class DepositionBehavior(TaskSet):
 
     @task
     def get_deposition(self):
-        # Assuming an endpoint for retrieving deposition details
-        deposition_id = 1  # Replace with logic to get a real ID if necessary
+        deposition_id = 1
         response = self.client.get(f"/depositions/{deposition_id}")
         if response.status_code != 200:
             print(f"Failed to retrieve deposition {deposition_id}: {response.status_code}")

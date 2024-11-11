@@ -30,15 +30,13 @@ def app():
     app = create_app()
     app.config.update({
         "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # Base de datos en memoria para pruebas
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:", 
     })
     with app.app_context():
-        # Usar inspect para verificar si la tabla existe
         inspector = inspect(db.engine)
         if "deposition" not in inspector.get_table_names():
-            Deposition.__table__.create(db.engine)  # Crear la tabla si no existe
+            Deposition.__table__.create(db.engine)  
         yield app
-        # Eliminar solo la tabla Deposition después de las pruebas
         Deposition.__table__.drop(db.engine)
 
 
@@ -52,7 +50,6 @@ def test_create_new_deposition(fakenodo_service, app):
                                                        orcid="0000-0000")]
         mock_dataset.ds_meta_data.tags = "test, dataset"
 
-        # Mock repository method
         with patch.object(fakenodo_service.deposition_repository, 'create_new_deposition', 
                           return_value=Deposition(id=1)) as mock_create:
             result = fakenodo_service.create_new_deposition(mock_dataset)
@@ -70,7 +67,6 @@ def test_upload_file(fakenodo_service, app):
         mock_user = MagicMock()
         mock_user.id = 1
 
-        # Mock file size and checksum calculation
         with patch("os.path.getsize", return_value=100), patch("app.modules.fakenodo.services.checksum", 
                                                                return_value="mocked_checksum"):
             result = fakenodo_service.upload_file(mock_dataset, 1, mock_feature_model, user=mock_user)
@@ -100,8 +96,7 @@ def test_get_doi(fakenodo_service, app):
         mock_deposition = MagicMock(spec=Deposition)
         mock_deposition.id = 1
         mock_deposition.doi = "fakenodo.doi.1"
-
-        # Patch the `get_deposition` method to return the mock deposition
+        
         with patch.object(fakenodo_service, 'get_deposition', return_value={"doi": "fakenodo.doi.1"}):
             result = fakenodo_service.get_doi(1)
             assert result == "fakenodo.doi.1"
