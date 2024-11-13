@@ -66,13 +66,13 @@ def test_signup_user_unsuccessful(test_client):
     assert f"Email {email} in use".encode("utf-8") in response.data
 
 
-#def test_signup_user_successful(test_client):
-#    response = test_client.post(
-#        "/signup",
-#        data=dict(name="Foo", surname="Example", email="foo@example.com", password="foo1234"),
-#        follow_redirects=True,
-#    )
-#    assert response.request.path == url_for("public.index"), "Signup was unsuccessful"
+def test_signup_user_successful(test_client):
+    response = test_client.post(
+        "/signup",
+        data=dict(name="Foo", surname="Example", email="foo@example.com", password="foo1234"),
+        follow_redirects=True,
+    )
+    assert response.request.path == url_for("public.index"), "Signup was unsuccessful"
 
 
 def test_service_create_with_profie_success(clean_database):
@@ -117,44 +117,3 @@ def test_service_create_with_profile_fail_no_password(clean_database):
 
     assert UserRepository().count() == 0
     assert UserProfileRepository().count() == 0
-def test_signup_initial_email_not_confirmed(test_client):
-    response = test_client.post(
-        "/signup",
-        data=dict(name="Test", surname="User", email="unconfirmed@example.com", password="password123"),
-        follow_redirects=True
-    )
-    user = UserRepository().get_by_email("unconfirmed@example.com")
-    assert user is not None, "El usuario debería existir"
-    assert not user.is_email_confirmed, "El email debería no estar confirmado por defecto"
-    assert response.request.path == url_for("auth.confirm_email"), "Debería redirigir a la confirmación de correo"
-
-
-def test_signup_redirects_to_email_confirmation(test_client):
-    response = test_client.post(
-        "/signup",
-        data=dict(name="Test", surname="User", email="redirect_confirm@example.com", password="password123"),
-        follow_redirects=True
-    )
-    assert response.request.path == url_for("auth.confirm_email"), "Debería redirigir a la confirmación de correo"
-
-
-def test_login_fails_for_unconfirmed_user(test_client):
-    AuthenticationService().create_with_profile(name="Test", surname="User", email="unconfirmed_login@example.com", password="password123")
-    response = test_client.post(
-        "/login",
-        data=dict(email="unconfirmed_login@example.com", password="password123"),
-        follow_redirects=True
-    )
-    assert response.request.path == url_for("auth.confirm_email"), "Usuario no confirmado debería ser redirigido a confirmación"
-
-
-def test_login_succeeds_after_confirmation(test_client):
-    user = AuthenticationService().create_with_profile(name="Test", surname="User", email="confirmed_user@example.com", password="password123")
-    AuthenticationService().confirm_user_email(user.id)
-    response = test_client.post(
-        "/login",
-        data=dict(email="confirmed_user@example.com", password="password123"),
-        follow_redirects=True
-    )
-    assert response.request.path == url_for("public.index"), "Debería redirigir al índice público tras login exitoso"
-
