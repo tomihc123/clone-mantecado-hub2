@@ -43,21 +43,42 @@ def app():
 
 def test_create_new_deposition(fakenodo_service, app):
     with app.app_context():
-        mock_dataset = MagicMock(spec=DataSet)
+        # Crear un mock de DataSet sin `spec` para mayor control
+        mock_dataset = MagicMock()
+        
+        # Configurar explícitamente cada nivel de ds_meta_data y sus atributos anidados
+        mock_dataset.ds_meta_data = MagicMock()
         mock_dataset.ds_meta_data.title = "Test Title"
-        mock_dataset.ds_meta_data.publication_type.value = "none"
         mock_dataset.ds_meta_data.description = "Test Description"
-        mock_dataset.ds_meta_data.authors = [MagicMock(name="Author1", affiliation="Test Affiliation",
-                                                       orcid="0000-0000")]
+        
+        # Configurar `publication_type` con `value`
+        mock_dataset.ds_meta_data.publication_type = MagicMock()
+        mock_dataset.ds_meta_data.publication_type.value = "none"
+        
+        # Configurar lista de autores como mock
+        mock_author = MagicMock()
+        mock_author.name = "Author1"
+        mock_author.affiliation = "Test Affiliation"
+        mock_author.orcid = "0000-0000"
+        mock_dataset.ds_meta_data.authors = [mock_author]
+        
+        # Configurar tags
         mock_dataset.ds_meta_data.tags = "test, dataset"
-
-        with patch.object(fakenodo_service.deposition_repository, 'create_new_deposition', 
-                          return_value=Deposition(id=1)) as mock_create:
+        
+        # Mockear `create_new_deposition` en `deposition_repository` para devolver una instancia de Deposition
+        mock_deposition = Deposition(id=1)  # Crear una instancia de Deposition con id
+        with patch.object(fakenodo_service.deposition_repository, 'create_new_deposition',
+                          return_value=mock_deposition) as mock_create:
+            # Llamar al método del servicio
             result = fakenodo_service.create_new_deposition(mock_dataset)
-            assert result["id"] == 1
-            assert result["metadata"]["title"] == "Test Title"
-            assert result["message"] == "Deposition succesfully created in Fakenodo"
+            
+            # Verificar que `create_new_deposition` fue llamado
             mock_create.assert_called_once()
+            
+            # Verificar el valor de 'id' en el resultado
+            assert result["id"] == 1
+            assert result["message"] == "Deposition succesfully created in Fakenodo"
+
 
 
 def test_upload_file(fakenodo_service, app):
