@@ -70,7 +70,7 @@ def create_dataset():
         if USE_FAKENODO:
             data = {}
             try:
-                fakenodo_response_json = fakenodo_service.create_new_deposition(dataset)
+                fakenodo_response_json = fakenodo_service.create_new_deposition(dataset.ds_meta_data)
                 response_data = json.dumps(fakenodo_response_json)
                 data = json.loads(response_data)
             except Exception as exc:
