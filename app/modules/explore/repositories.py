@@ -1,8 +1,7 @@
-import re
-from sqlalchemy import any_, or_
-import unidecode
-from app.modules.dataset.models import Author, DSMetaData, DataSet, PublicationType
-from app.modules.featuremodel.models import FMMetaData, FeatureModel
+from sqlalchemy import or_
+from sqlalchemy.orm import aliased
+from app import db
+from app.modules.dataset.models import DSMetaData, DataSet, Author, PublicationType
 from core.repositories.BaseRepository import BaseRepository
 
 
@@ -10,52 +9,77 @@ class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter(self, query="", sorting="newest", publication_type="any", tags=[], **kwargs):
-        # Normalize and remove unwanted characters
-        normalized_query = unidecode.unidecode(query).lower()
-        cleaned_query = re.sub(r'[,.":\'()\[\]^;!¡¿?]', "", normalized_query)
+    def filter_datasets(self, query_string, sorting="newest", tags=[], publication_type="any"):
+        # Crear un alias para `ds_meta_data` para evitar conflictos de alias.
+        ds_meta_data_alias = aliased(DSMetaData)
+        author_meta_data_alias = aliased(DSMetaData)  # Nuevo alias para la segunda unión
+        min_size_filter = None
+        max_size_filter = None
 
-        filters = []
-        for word in cleaned_query.split():
-            filters.append(DSMetaData.title.ilike(f"%{word}%"))
-            filters.append(DSMetaData.description.ilike(f"%{word}%"))
-            filters.append(Author.name.ilike(f"%{word}%"))
-            filters.append(Author.affiliation.ilike(f"%{word}%"))
-            filters.append(Author.orcid.ilike(f"%{word}%"))
-            filters.append(FMMetaData.uvl_filename.ilike(f"%{word}%"))
-            filters.append(FMMetaData.title.ilike(f"%{word}%"))
-            filters.append(FMMetaData.description.ilike(f"%{word}%"))
-            filters.append(FMMetaData.publication_doi.ilike(f"%{word}%"))
-            filters.append(FMMetaData.tags.ilike(f"%{word}%"))
-            filters.append(DSMetaData.tags.ilike(f"%{word}%"))
+        # Inicia la consulta, usando el alias en la unión
+        query = db.session.query(DataSet).join(ds_meta_data_alias, DataSet.ds_meta_data)
 
-        datasets = (
-            self.model.query
-            .join(DataSet.ds_meta_data)
-            .join(DSMetaData.authors)
-            .join(DataSet.feature_models)
-            .join(FeatureModel.fm_meta_data)
-            .filter(or_(*filters))
-            .filter(DSMetaData.dataset_doi.isnot(None))  # Exclude datasets with empty dataset_doi
-        )
-
+        # Filtrar por tipo de publicación
         if publication_type != "any":
             matching_type = None
             for member in PublicationType:
                 if member.value.lower() == publication_type:
                     matching_type = member
                     break
-
             if matching_type is not None:
-                datasets = datasets.filter(DSMetaData.publication_type == matching_type.name)
+                query = query.filter(ds_meta_data_alias.publication_type == matching_type.name)
 
-        if tags:
-            datasets = datasets.filter(DSMetaData.tags.ilike(any_(f"%{tag}%" for tag in tags)))
+        # Procesar el filtro de `query_string`
+        query_filter = query_string.strip()
 
-        # Order by created_at
-        if sorting == "oldest":
-            datasets = datasets.order_by(self.model.created_at.asc())
+        # Filtrar por autor
+        if query_filter.startswith('author:'):
+            author_filter = query_filter[7:].strip()
+            query = query.join(author_meta_data_alias).join(Author).filter(Author.name.ilike(f'%{author_filter}%'))
+
+        # Filtrar por tamaño mínimo
+        elif query_filter.startswith('min_size:'):
+            try:
+                min_size_filter = int(query_filter[9:].strip())
+            except ValueError:
+                min_size_filter = None
+
+        # Filtrar por tamaño máximo
+        elif query_filter.startswith('max_size:'):
+            try:
+                max_size_filter = int(query_filter[9:].strip())
+            except ValueError:
+                max_size_filter = None
+
+        # Filtrar por etiquetas
+        elif query_filter.startswith('tags:'):
+            tags_filter = query_filter[5:].strip()
+            query = query.filter(ds_meta_data_alias.tags.ilike(f'%{tags_filter}%'))
+
+        # Filtrar por título o tag(consulta general)
         else:
-            datasets = datasets.order_by(self.model.created_at.desc())
+            query = query.filter(
+                or_(
+                    ds_meta_data_alias.title.ilike(f"%{query_filter}%"),
+                    ds_meta_data_alias.tags.ilike(f"%{query_filter}%")
+                )
+            )
 
-        return datasets.all()
+        # Ordenar resultados
+        if sorting == "oldest":
+            query = query.order_by(DataSet.created_at.asc())
+        else:
+            query = query.order_by(DataSet.created_at.desc())
+
+        # Ejecutar la consulta y obtener todos los resultados
+        results = query.all()
+
+        # Filtrar por tamaño mínimo después de obtener los resultados
+        if min_size_filter is not None:
+            results = [ds for ds in results if ds.get_file_total_size() >= min_size_filter]
+
+        # Filtrar por tamaño máximo después de obtener los resultados
+        if max_size_filter is not None:
+            results = [ds for ds in results if ds.get_file_total_size() <= max_size_filter]
+
+        return results
