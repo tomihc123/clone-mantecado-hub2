@@ -261,7 +261,10 @@ def subdomain_index(doi):
     # Save the cookie to the user's browser
     # Calcula el promedio de valoraciones del dataset
     average_rating = RatingService.get_average_rating(dataset.id)  # Asegúrate de que `get_average_rating` esté bien implementado
-    # Guarda la cookie en el navegador del usuario
+    # Calcula y asigna la media de valoración para cada modelo
+    for model in dataset.feature_models:
+        model.average_rating = RatingService.get_average_model_rating(model.id)
+    # Renderiza la plantilla pasando los valores calculados
     user_cookie = ds_view_record_service.create_cookie(dataset=dataset)
     resp = make_response(render_template("dataset/view_dataset.html", dataset=dataset, average_rating=average_rating))
     resp.set_cookie("view_cookie", user_cookie)

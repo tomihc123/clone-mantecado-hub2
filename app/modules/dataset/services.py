@@ -8,6 +8,7 @@ import uuid
 from app import db
 from flask import request
 
+from app.modules.featuremodel.models import ModelRating
 from app.modules.auth.services import AuthenticationService
 from app.modules.dataset.models import DSViewRecord, DataSet, DSMetaData, Rating
 from app.modules.dataset.repositories import (
@@ -239,5 +240,30 @@ class RatingService:
             return None
     
         # Calcula el promedio de las valoraciones y redondea a dos decimales
+        average_rating = sum(r.rating for r in ratings) / len(ratings)
+        return round(average_rating, 2)
+    @staticmethod
+    def add_model_rating(user_id, model_id, rating):
+        # Verifica si el usuario ya ha valorado este modelo específico
+        existing_rating = ModelRating.query.filter_by(user_id=user_id, model_id=model_id).first()
+        
+        if existing_rating:
+            # Si ya existe una valoración, actualízala
+            existing_rating.rating = rating
+        else:
+            # Si no existe, crea una nueva valoración
+            new_rating = ModelRating(user_id=user_id, model_id=model_id, rating=rating)
+            db.session.add(new_rating)
+        
+        db.session.commit()  # Guarda los cambios en la base de datos
+    
+    @staticmethod
+    def get_average_model_rating(model_id):
+        # Obtiene todas las valoraciones para el modelo específico
+        ratings = ModelRating.query.filter_by(model_id=model_id).all()
+        if not ratings:
+            return None  # Devuelve None si no hay valoraciones
+        
+        # Calcula la media de las valoraciones
         average_rating = sum(r.rating for r in ratings) / len(ratings)
         return round(average_rating, 2)
