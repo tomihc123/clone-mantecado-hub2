@@ -1,0 +1,23 @@
+{% extends "base_template.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-header text-center">
+                    <h3>Confirm Your Email</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-center">Thank you for signing up! Please confirm your email to complete the registration.</p>
+                    <form method="POST">
+                        <div class="d-grid gap-2 col-6 mx-auto">
+                            <button type="submit" class="btn btn-primary">Confirm Email</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
