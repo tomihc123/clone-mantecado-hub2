@@ -1,5 +1,3 @@
-from app.modules.auth.repositories import UserRepository
-from app.modules.auth.services import AuthenticationService
 import pytest
 from unittest.mock import patch, MagicMock
 from app.modules.notepad.services import NotepadService
@@ -11,23 +9,16 @@ from app.modules.auth.models import User
 from app.modules.profile.models import UserProfile
 from flask_login import current_user
 
-
 @pytest.fixture(scope="module")
 def test_client(test_client):
     """
-    Crea un usuario confirmado en el contexto de prueba.
+    Extends the test_client fixture to add additional specific data for module testing.
     """
     with test_client.application.app_context():
-        # Crear y confirmar un usuario de prueba
-        user = AuthenticationService().create_with_profile(
-            name="Test",
-            surname="User",
-            email="user@example.com",
-            password="test1234"
-        )
-        AuthenticationService().confirm_user_email(user.id)  # Confirmar email
-
-        yield test_client
+        # Add HERE new elements to the database that you want to exist in the test context.
+        # DO NOT FORGET to use db.session.add(<element>) and db.session.commit() to save the data.
+        pass
+    yield test_client
 
 @pytest.fixture
 def notepad_service():
@@ -100,86 +91,98 @@ def test_client(test_client):
     yield test_client
 
 
-'''
 def test_get_notepad(test_client):
-    # Login del usuario confirmado
-    login_response = test_client.post("/login", data=dict(email="user@example.com", password="test1234"), follow_redirects=True)
+    """
+    Test retrieving a specific notepad via GET request.
+    """
+    # Log in the test user
+    login_response = login(test_client, "user@example.com", "test1234")
     assert login_response.status_code == 200, "Login was unsuccessful."
 
-    # Crear un notepad
+    # Create a notepad
     response = test_client.post('/notepad/create', data={
         'title': 'Notepad2',
-        'body': 'This is the body of notepad2'
+        'body': 'This is the body of notepad2.'
     }, follow_redirects=True)
     assert response.status_code == 200
 
-    # Confirmar la creación en la base de datos
+    # Get the notepad ID from the database
     with test_client.application.app_context():
-        user = UserRepository().get_by_email("user@example.com")
-        notepad = Notepad.query.filter_by(title='Notepad2', user_id=user.id).first()
-        assert notepad is not None, "The notepad was not found in the database."
+        from app.modules.notepad.models import Notepad
+        notepad = Notepad.query.filter_by(title='Notepad2', user_id=current_user.id).first()
+        assert notepad is not None, "Notepad was not found in the database."
 
-    # Acceder a la página de detalles del notepad
-    response = test_client.get(f'/notepad/{notepad.id}', follow_redirects=True)
+    # Access the notepad detail page
+    response = test_client.get(f'/notepad/{notepad.id}')
     assert response.status_code == 200, "The notepad detail page could not be accessed."
-    assert b'Notepad2' in response.data, "The notepad title is not present on the page after accessing details."
+    assert b'Notepad2' in response.data, "The notepad title is not present on the page."
 
-    test_client.get("/logout", follow_redirects=True)
-
+    logout(test_client)
 
 def test_edit_notepad(test_client):
-    # Login del usuario confirmado
-    login_response = test_client.post("/login", data=dict(email="user@example.com", password="test1234"), follow_redirects=True)
-    assert login_response.status_code == 200
+    """
+    Test editing a notepad via POST request.
+    """
+    # Log in the test user
+    login_response = login(test_client, "user@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
 
-    # Crear un notepad
+    # Create a notepad
     response = test_client.post('/notepad/create', data={
         'title': 'Notepad3',
-        'body': 'This is the body of notepad3'
+        'body': 'This is the body of notepad3.'
     }, follow_redirects=True)
     assert response.status_code == 200
 
-    # Confirmar la creación en la base de datos
+    # Get the notepad ID from the database
     with test_client.application.app_context():
-        user = UserRepository().get_by_email("user@example.com")
-        notepad = Notepad.query.filter_by(title='Notepad3', user_id=user.id).first()
-        assert notepad is not None, "The notepad was not found in the database."
+        from app.modules.notepad.models import Notepad
+        notepad = Notepad.query.filter_by(title='Notepad3', user_id=current_user.id).first()
+        assert notepad is not None, "Notepad was not found in the database."
 
-    # Editar el notepad
+    # Edit the notepad
     response = test_client.post(f'/notepad/edit/{notepad.id}', data={
         'title': 'Notepad3 Edited',
-        'body': 'Edited body of notepad3.'
+        'body': 'This is the edited body of notepad3.'
     }, follow_redirects=True)
-    assert response.status_code == 200
+    assert response.status_code == 200, "The notepad could not be edited."
 
-    # Verificar el cambio en el notepad editado en la base de datos
+    # Check that the notepad was updated
     with test_client.application.app_context():
-        edited_notepad = Notepad.query.get(notepad.id)
-        assert edited_notepad.title == 'Notepad3 Edited', "The notepad title was not updated in the database."
-        assert edited_notepad.body == 'Edited body of notepad3.', "The notepad body was not updated in the database."
+        notepad = Notepad.query.get(notepad.id)
+        assert notepad.title == 'Notepad3 Edited', "The notepad title was not updated."
+        assert notepad.body == 'This is the edited body of notepad3.', "The notepad body was not updated."
 
-    test_client.get("/logout", follow_redirects=True)
-    
- '''
- 
-    
+    logout(test_client)
+
 def test_delete_notepad(test_client):
-    login_response = test_client.post("/login", data=dict(email="user@example.com", password="test1234"), follow_redirects=True)
-    assert login_response.status_code == 200
+    """
+    Test deleting a notepad via POST request.
+    """
+    # Log in the test user
+    login_response = login(test_client, "user@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
 
-    # Crear un notepad para eliminar
+    # Create a notepad
     response = test_client.post('/notepad/create', data={
         'title': 'Notepad4',
-        'body': 'Body of notepad4.'
+        'body': 'This is the body of notepad4.'
     }, follow_redirects=True)
     assert response.status_code == 200
 
-    # Eliminar el notepad en el contexto de solicitud HTTP
-    response = test_client.post('/notepad/delete/1', follow_redirects=True)
-    assert response.status_code == 200
+    # Get the notepad ID from the database
+    with test_client.application.app_context():
+        from app.modules.notepad.models import Notepad
+        notepad = Notepad.query.filter_by(title='Notepad4', user_id=current_user.id).first()
+        assert notepad is not None, "Notepad was not found in the database."
 
-    # Verificar que el notepad fue eliminado
-    response = test_client.get('/notepad')
-    assert b'Notepad4' not in response.data, "The notepad title should not be present on the page after deletion."
+    # Delete the notepad
+    response = test_client.post(f'/notepad/delete/{notepad.id}', follow_redirects=True)
+    assert response.status_code == 200, "The notepad could not be deleted."
 
-    test_client.get("/logout", follow_redirects=True)
+    # Check that the notepad was deleted
+    with test_client.application.app_context():
+        notepad = Notepad.query.get(notepad.id)
+        assert notepad is None, "The notepad was not deleted."
+
+    logout(test_client)
