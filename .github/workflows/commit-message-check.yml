@@ -1,0 +1,27 @@
+name: Commit Message Check
+
+on:
+  push:
+    branches:
+      - main  # Cambia esto si tu rama principal tiene otro nombre
+
+jobs:
+  commit-message-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Check commit messages
+        run: |
+          # Obtener los mensajes de commit
+          commits=$(git log --format=%s -n 10)  # Cambia el número si necesitas más commits
+          echo "$commits" | while read -r commit; do
+            if ! [[ "$commit" =~ ^(Feat|Fix|Style|Refactor|Test|Chore):\ .+ ]]; then
+              echo "Error: El mensaje de commit '$commit' no sigue la plantilla requerida."
+              echo "Formato correcto: [Tipo]: Descripción breve en español"
+              echo "Tipos permitidos: Feat, Fix, Style, Refactor, Test, Chore"
+              exit 1
+            fi
+          done
