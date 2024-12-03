@@ -289,6 +289,55 @@ def subdomain_index(doi):
 
     return resp
 
+@dataset_bp.route("/dataset/download_all_datasets", methods=["GET"])
+def download_all_datasets():
+    try:
+
+        datasets = dataset_service.download_all_datasets()
+        
+        if not datasets:
+            return jsonify({"error": "No datasets found."}), 404
+        
+        
+        temp_dir = create_temp_dir()
+        zip_path = os.path.join(temp_dir, "allDatasets.zip")
+        
+        # Crear el archivo ZIP 
+        create_zip_of_datasets(datasets, zip_path)
+        
+        # Enviar el archivo ZIP 
+        return send_from_directory(
+            temp_dir,
+            "allDatasets.zip",
+            as_attachment=True,
+            mimetype="application/zip"
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+        
+        if 'temp_dir' in locals():
+            shutil.rmtree(temp_dir)
+
+def create_temp_dir():
+    #Crea un directorio temporal
+    return tempfile.mkdtemp()
+
+def create_zip_of_datasets(datasets, zip_path):
+    #Creamos el Zip
+    with ZipFile(zip_path, "w") as zipf:
+        for dataset in datasets:
+            file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+            
+            if not os.path.exists(file_path):
+                continue 
+            
+            for subdir, dirs, files in os.walk(file_path):
+                for file in files:
+                    full_path = os.path.join(subdir, file)
+                    relative_path = os.path.relpath(full_path, file_path)
+                    arcname = os.path.join(f"dataset_{dataset.id}", relative_path)
+                    zipf.write(full_path, arcname=arcname)
 
 @dataset_bp.route("/dataset/unsynchronized/<int:dataset_id>/", methods=["GET"])
 @login_required
