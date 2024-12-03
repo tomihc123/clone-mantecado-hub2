@@ -22,10 +22,7 @@ def app():
         "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
     })
     with app.app_context():
-        db.create_all()  # Crear las tablas en la base de datos
         yield app
-        db.drop_all()  # Limpiar la base de datos después de las pruebas
-
     
 #Fixture para simular datasets 
 
