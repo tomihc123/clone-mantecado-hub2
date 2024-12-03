@@ -117,44 +117,42 @@
             <div class="row">
 
                 <div class="col-12">
-
-                <div class="card">
-
-                    <div class="card-body">
-
-                        <h2> <b>Hub statistics</b> </h2>
+                    <div class="card">
+                        <div class="card-body">
+                            <h2><b>Hub statistics</b></h2>
+                
+                            <h1 class="h2 mb-3">
+                                <h4 class="h4 mb-3" class="stats-color">
+                                    <i data-feather="database" class="align-middle mr-2 stats-color"></i>&nbsp;{{ datasets_counter }} datasets
+                                </h4>
+                
+                                <h4 class="h4 mb-3" class="stats-color">
+                                    <i data-feather="file" class="align-middle mr-2 stats-color"></i>&nbsp;{{ feature_models_counter }} feature models
+                                </h4>
+                
+                                <h4 class="h4 mb-3" class="stats-color">
+                                    <i data-feather="eye" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_dataset_views }} datasets viewed
+                                </h4>
+                
+                                <h4 class="h4 mb-3" class="stats-color">
+                                    <i data-feather="eye" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_feature_model_views }} feature models viewed
+                                </h4>
+                
+                                <h4 class="h4 mb-3" class="stats-color">
+                                    <i data-feather="download" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_dataset_downloads }} datasets downloaded
+                                </h4>
+                
+                                <h4 class="h4" class="stats-color">
+                                    <i data-feather="download" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_feature_model_downloads }} feature models downloaded
+                                </h4>
+                
+                                <!-- Button to go to dashboard -->
+                                <a href="{{ url_for('public.dashboard') }}" class="btn btn-primary mt-3">Ver Dashboard</a>
+                            </h1>
+                        </div>
                     
-                        <h1 class="h2 mb-3">
-                    
-                            <h4 class="h4 mb-3" class="stats-color">
-                                <i data-feather="database" class="align-middle mr-2 stats-color"></i>&nbsp;{{ datasets_counter }} datasets
-                            </h4>
-                    
-                            <h4 class="h4 mb-3" class="stats-color">
-                                <i data-feather="file" class="align-middle mr-2 stats-color"></i>&nbsp;{{ feature_models_counter }} feature models
-                            </h4>
-                    
-                            <h4 class="h4 mb-3" class="stats-color">
-                                <i data-feather="eye" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_dataset_views }} datasets viewed
-                            </h4>
-                    
-                            <h4 class="h4 mb-3" class="stats-color">
-                                <i data-feather="eye" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_feature_model_views }} feature models viewed
-                            </h4>
-                    
-                            <h4 class="h4 mb-3" class="stats-color">
-                                <i data-feather="download" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_dataset_downloads }} datasets downloaded
-                            </h4>
-                    
-                            <h4 class="h4" class="stats-color">
-                                <i data-feather="download" class="align-middle mr-2 stats-color"></i>&nbsp;{{ total_feature_model_downloads }} feature models downloaded
-                            </h4>
-                    
-                        </h1>
-                    
-                    </div>                    
-
                 </div>
+                
             </div>
 
                 <div class="col-12">
