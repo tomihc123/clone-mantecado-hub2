@@ -2,8 +2,7 @@ from io import BytesIO
 import os
 import pytest
 from unittest.mock import patch
-from flask import jsonify
-from app import create_app, db
+from app import create_app
 from app.modules.dataset.models import DataSet
 from app.modules.dataset.repositories import DataSetRepository
 import tempfile
