@@ -113,7 +113,16 @@ class DataSetRepository(BaseRepository):
             .limit(5)
             .all()
         )
-
+    
+    def download_all_datasets(self):
+        try:
+            
+            datasets = self.model.query.all()
+            return datasets
+        except Exception as e:
+            # Manejo de excepciones
+            print(f"Error al obtener los datasets: {e}")
+            return []
 
 class DOIMappingRepository(BaseRepository):
     def __init__(self):
