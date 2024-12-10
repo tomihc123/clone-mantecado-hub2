@@ -57,6 +57,39 @@ class ProfileBehavior(TaskSet):
         if b"No profiles found" not in response.content:
             print("Expected 'No profiles found' for an empty query, but it was not found in response")
 
+    @task
+    def test_search_single_character(self):
+        """
+        Prueba de carga para la búsqueda con una sola letra.
+        """
+        response = self.client.get("/profile/search?query=N")
+        if response.status_code != 200:
+            print(f"Failed to search profiles with single character query: {response.status_code}")
+        if b"Name" not in response.content:
+            print("Expected 'Name' in search results for query 'N', but it was not found")
+
+    @task
+    def test_search_with_extra_spaces(self):
+        """
+        Prueba de carga para la búsqueda con espacios adicionales.
+        """
+        response = self.client.get("/profile/search?query=  Name  ")
+        if response.status_code != 200:
+            print(f"Failed to search profiles with query containing extra spaces: {response.status_code}")
+        if b"Name" not in response.content:
+            print("Expected 'Name' in search results for query with extra spaces, but it was not found")
+
+    @task
+    def test_search_no_results(self):
+        """
+        Prueba de carga para la búsqueda que no devuelve resultados.
+        """
+        response = self.client.get("/profile/search?query=NonExistentName")
+        if response.status_code != 200:
+            print(f"Failed to search profiles with query 'NonExistentName': {response.status_code}")
+        if b"No profiles found" not in response.content:
+            print("Expected 'No profiles found' for query 'NonExistentName', but it was not found")
+    
 class UserBehavior(HttpUser):
     tasks = [ProfileBehavior]
     min_wait = 5000  # Tiempo mínimo entre tareas (5 segundos)
