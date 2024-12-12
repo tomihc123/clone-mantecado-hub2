@@ -409,7 +409,6 @@
             <div class="modal-body text-center">
                 <p class="mb-3">Please rate this dataset</p>
                 <form id="rate-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="dataset_id" value="{{ dataset.id }}">
                     
                     <!-- Barra de estrellas con indicador de valor -->
@@ -445,7 +444,6 @@
             <div class="modal-body text-center">
                 <p class="mb-3">Please rate this model</p>
                 <form id="rate-model-form">
-                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                     <input type="hidden" id="model-id" name="model_id" value="">
                     <!-- Barra de estrellas -->
                     <div class="rating">
@@ -623,9 +621,6 @@
         fetch("/dataset/rate", {
             method: "POST",
             body: formData,
-            headers: {
-                "X-CSRFToken": "{{ csrf_token() }}"  // Asegúrate de incluir el token CSRF si es necesario
-            }
         })
         .then(response => response.json())
         .then(data => {
