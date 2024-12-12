@@ -9,3 +9,7 @@ class Deposition(db.Model):
 
     def __repr__(self):
         return f'Deposition<{self.id}>'
+
+    def init(self, doi, meta_data):
+        self.doi = doi
+        self.metadata = meta_data
