@@ -39,7 +39,7 @@ class DepositionService(BaseService):
             res = {
                 "deposition_id": deposition.id,
                 "doi": deposition_doi,
-                "metadata": deposition.metadata,
+                "metadata": deposition.meta_data,
                 "message": "Deposition succesfully created in Fakenodo"
             }
 
@@ -106,7 +106,7 @@ class DepositionService(BaseService):
         if not deposition:
             raise Exception("Error 404: Deposition not found.")
 
-        res = self._response(deposition=deposition, metadata=deposition.metadata,
+        res = self._response(deposition=deposition, metadata=deposition.meta_data,
                              message="Deposition succesfully retrived from fakenodo", doi=deposition.doi)
         return res
 

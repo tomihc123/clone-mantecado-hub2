@@ -3,7 +3,7 @@ from app import db
 
 class Deposition(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    metadata = db.Column(db.JSON, nullable=False)
+    meta_data = db.Column(db.JSON, nullable=False)
     status = db.Column(db.String(50), nullable=False, default="draft")
     doi = db.Column(db.String(250), unique=True, nullable=True)
 
@@ -12,4 +12,4 @@ class Deposition(db.Model):
 
     def init(self, doi, meta_data):
         self.doi = doi
-        self.metadata = meta_data
+        self.meta_data = meta_data
