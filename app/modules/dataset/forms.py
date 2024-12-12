@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SelectField, FieldList, FormField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, URL, Optional
+from wtforms.validators import DataRequired, URL, Optional, Regexp
 
 from app.modules.dataset.models import PublicationType
 
@@ -62,7 +62,7 @@ class DataSetForm(FlaskForm):
         choices=[(pt.value, pt.name.replace("_", " ").title()) for pt in PublicationType],
         validators=[DataRequired()],
     )
-    publication_doi = StringField("Publication DOI", validators=[Optional(), URL()])
+    publication_doi = StringField("Publication DOI", validators=[Optional(), Regexp(r"^10\.\d{4}$")])
     dataset_doi = StringField("Dataset DOI", validators=[Optional(), URL()])
     tags = StringField("Tags (separated by commas)")
     authors = FieldList(FormField(AuthorForm))

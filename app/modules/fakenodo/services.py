@@ -35,8 +35,16 @@ class DepositionService(BaseService):
 
         try:
             deposition = self.deposition_repositpry.createDeposition(metadata=deposition_metadata)
-            return self._response(deposition=deposition, doi=deposition_doi, metadata=deposition_metadata,
-                                  message="Deposition succesfully created in Fakenodo")
+
+            res = {
+                "deposition_id": deposition.id,
+                "doi": deposition_doi,
+                "metadata": deposition.metadata,
+                "message": "Deposition succesfully created in Fakenodo"
+            }
+
+            return res
+
         except Exception as ex:
             raise Exception(f"Failed to create deposition in Fakenodo with error: {ex}")
 
@@ -136,16 +144,6 @@ class DepositionService(BaseService):
             "keywords": ["uvlhub"] if not metaData.tags else metaData.tags.split(", ") + ["uvlhub"],
             "access_right": "open",
             "license": "uvlhub-license"
-        }
-        return res
-
-    def _response(self, deposition: Deposition, metadata: dict, message: str, doi: str) -> dict:
-
-        res = {
-            "deposition_id": deposition.id,
-            "doi": doi,
-            "metadata": metadata,
-            "message": message
         }
         return res
 
