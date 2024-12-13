@@ -145,6 +145,22 @@ class DataSetService(BaseService):
     def download_all_datasets(self):
         return self.repository.download_all_datasets()
 
+    def synchronize_unsynchronized_datasets(self, user_id: int, dataset_id: int) -> None:
+        unsynchronized_datasets = self.repository.get_unsynchronized(user_id)
+
+        print(f"unsynchronized_datasets: {[d.id for d in unsynchronized_datasets]}")
+        print(f"dataset_id: {dataset_id} (type: {type(dataset_id)})")
+        dataset = next((d for d in unsynchronized_datasets if d.id == dataset_id), None)
+
+        if dataset:
+            dataset.ds_meta_data.dataset_doi = self.generate_doi_for_dataset(dataset)
+            self.repository.session.commit()
+        else:
+            raise ValueError("Dataset no encontrado.")
+
+    def generate_doi_for_dataset(self, dataset: DataSet) -> str:
+        return f"10.1234/dataset/{dataset.id}"
+
 
 class AuthorService(BaseService):
     def __init__(self):
