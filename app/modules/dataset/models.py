@@ -78,6 +78,14 @@ class DataSet(db.Model):
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
 
+    # Un dataset puede o no formar parte de una comunidad
+    community_id = db.Column(db.Integer, db.ForeignKey('community_id'), nullable=True)
+
+    # Asigna el dataset a una comunidad
+    def assign_to_community(self, community):
+        self.community_id = community.id
+        db.session.commit()
+
     def name(self):
         return self.ds_meta_data.title
 
@@ -171,13 +179,15 @@ class DOIMapping(db.Model):
     dataset_doi_old = db.Column(db.String(120))
     dataset_doi_new = db.Column(db.String(120))
 
+
 class Rating(db.Model):
     __tablename__ = 'ratings'
-    
+
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     dataset_id = db.Column(db.Integer, db.ForeignKey('data_set.id'), nullable=False)
     rating = db.Column(db.Integer, nullable=False)  # Valor de 1 a 5
+
     def __init__(self, user_id, dataset_id, rating):
         self.user_id = user_id
         self.dataset_id = dataset_id

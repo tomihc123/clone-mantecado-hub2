@@ -4,6 +4,7 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app import db
+from app.modules.community.models import community_members
 
 
 class User(db.Model, UserMixin):
@@ -15,6 +16,8 @@ class User(db.Model, UserMixin):
 
     data_sets = db.relationship('DataSet', backref='user', lazy=True)
     profile = db.relationship('UserProfile', backref='user', uselist=False)
+    community = db.relationship('Community', secondary=community_members,
+                                backref=db.backref('community_members', lazy='dynamic'))
 
     def __init__(self, **kwargs):
         super(User, self).__init__(**kwargs)
