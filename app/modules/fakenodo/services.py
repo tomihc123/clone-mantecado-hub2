@@ -19,7 +19,7 @@ load_dotenv()
 
 class DepositionService(BaseService):
     def __init__(self):
-        self.deposition_repositpry = DepositionRepository()
+        self.deposition_repository = DepositionRepository()
 
     # Metodos Principales
 
@@ -34,7 +34,7 @@ class DepositionService(BaseService):
             deposition_doi = None
 
         try:
-            deposition = self.deposition_repositpry.createDeposition(metadata=deposition_metadata)
+            deposition = self.deposition_repository.createDeposition(metadata=deposition_metadata)
 
             res = {
                 "deposition_id": deposition.id,
