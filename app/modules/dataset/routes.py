@@ -30,7 +30,8 @@ from app.modules.dataset.services import (
     DSMetaDataService,
     DSViewRecordService,
     DataSetService,
-    DOIMappingService
+    DOIMappingService,
+    RatingService
 )
 
 from app.modules.fakenodo.services import DepositionService
@@ -247,7 +248,7 @@ def download_dataset(dataset_id):
     return resp
 
 
-@dataset_bp.route("/doi/<path:doi>/", methods=["GET"])
+@dataset_bp.route("/doi/<path:doi>", methods=["GET"])
 def subdomain_index(doi):
 
     # Check if the DOI is an old DOI
@@ -266,11 +267,70 @@ def subdomain_index(doi):
     dataset = ds_meta_data.data_set
 
     # Save the cookie to the user's browser
+    # Calcula el promedio de valoraciones del dataset
+    average_rating = RatingService.get_average_rating(dataset.id)
+    # Asegúrate de que `get_average_rating` esté bien implementado
+    # Calcula y asigna la media de valoración para cada modelo
+    for model in dataset.feature_models:
+        model.average_rating = RatingService.get_average_model_rating(model.id)
+    # Renderiza la plantilla pasando los valores calculados
     user_cookie = ds_view_record_service.create_cookie(dataset=dataset)
-    resp = make_response(render_template("dataset/view_dataset.html", dataset=dataset))
+    resp = make_response(render_template("dataset/view_dataset.html", dataset=dataset, average_rating=average_rating))
     resp.set_cookie("view_cookie", user_cookie)
 
     return resp
+
+
+@dataset_bp.route("/dataset/download_all_datasets", methods=["GET"])
+def download_all_datasets():
+    try:
+
+        datasets = dataset_service.download_all_datasets()
+
+        if not datasets:
+            return jsonify({"error": "No datasets found."}), 404
+
+        temp_dir = create_temp_dir()
+        zip_path = os.path.join(temp_dir, "allDatasets.zip")
+
+        # Crear el archivo ZIP
+        create_zip_of_datasets(datasets, zip_path)
+
+        # Enviar el archivo ZIP
+        return send_from_directory(
+            temp_dir,
+            "allDatasets.zip",
+            as_attachment=True,
+            mimetype="application/zip"
+        )
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    finally:
+
+        if 'temp_dir' in locals():
+            shutil.rmtree(temp_dir)
+
+
+def create_temp_dir():
+    # Crea un directorio temporal
+    return tempfile.mkdtemp()
+
+
+def create_zip_of_datasets(datasets, zip_path):
+    # Creamos el Zip
+    with ZipFile(zip_path, "w") as zipf:
+        for dataset in datasets:
+            file_path = f"uploads/user_{dataset.user_id}/dataset_{dataset.id}/"
+
+            if not os.path.exists(file_path):
+                continue
+
+            for subdir, dirs, files in os.walk(file_path):
+                for file in files:
+                    full_path = os.path.join(subdir, file)
+                    relative_path = os.path.relpath(full_path, file_path)
+                    arcname = os.path.join(f"dataset_{dataset.id}", relative_path)
+                    zipf.write(full_path, arcname=arcname)
 
 
 @dataset_bp.route("/dataset/unsynchronized/<int:dataset_id>/", methods=["GET"])
@@ -310,3 +370,21 @@ def synchronize_datasets():
     except Exception as e:
         print("Error:", e)  # Log para mostrar el error específico
         return jsonify({"message": str(e)}), 400
+
+
+@dataset_bp.route('/dataset/rate', methods=['POST'])
+@login_required
+def rate_dataset():
+    user_id = current_user.id
+    dataset_id = request.form.get('dataset_id')
+    rating = int(request.form.get('rating'))
+
+    # Instancia del servicio de valoraciones
+    rating_service = RatingService()
+    rating_service.add_rating(user_id, dataset_id, rating)
+
+    # Calcula el promedio actualizado
+    average_rating = rating_service.get_average_rating(dataset_id)
+
+    # Devuelve el promedio en JSON
+    return jsonify({'average_rating': average_rating}), 200

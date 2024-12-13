@@ -2,6 +2,7 @@ import os
 
 from flask import Flask
 
+from flask_wtf import CSRFProtect
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_migrate import Migrate
@@ -16,6 +17,7 @@ from core.managers.logging_manager import LoggingManager
 load_dotenv()
 
 # Create the instances
+csrf = CSRFProtect()
 db = SQLAlchemy()
 migrate = Migrate()
 
