@@ -12,7 +12,7 @@ class ExploreRepository(BaseRepository):
     def filter_datasets(self, query_string, sorting="newest", publication_type="any",uvl_min="",uvl_max=""):
 
         ds_meta_data_alias = aliased(DSMetaData)
-        author_meta_data_alias = aliased(DSMetaData)  
+        author_meta_data_alias = aliased(DSMetaData)
         min_size_filter = None
         max_size_filter = None
 
@@ -27,19 +27,17 @@ class ExploreRepository(BaseRepository):
                     matching_type = member
                     break
             if matching_type is not None:
-                query = query.filter(ds_meta_data_alias.publication_type == matching_type.name)      
-                
-                
+                query = query.filter(ds_meta_data_alias.publication_type == matching_type.name)
         query_filter = query_string.strip()
-        
-        
+
+
         for filter_item in query_filter.split(';'):
-            
+
             if filter_item.startswith('tags:'):
                 tag_value = filter_item[5:].strip()
                 query = query.filter(ds_meta_data_alias.tags.ilike(f'%{tag_value}%'))
-                
-                
+
+
             elif filter_item.startswith('models_max:'):
                 models_max_value = filter_item[11:].strip()
                 uvl_max = models_max_value
@@ -67,12 +65,12 @@ class ExploreRepository(BaseRepository):
             elif filter_item.startswith('author:'):
                 author_name = filter_item[7:].strip()
                 query = query.join(author_meta_data_alias).join(Author).filter(Author.name.ilike(f'%{author_name}%'))
-            
-            
+
+
             elif filter_item.startswith('title:'):
                 title_value = filter_item[6:].strip()
                 query = query.filter(ds_meta_data_alias.title.ilike(f'%{title_value}%'))
-                
+
 
             else:
                 query = query.filter(
@@ -98,7 +96,7 @@ class ExploreRepository(BaseRepository):
 
         if max_size_filter is not None:
             results = [ds for ds in results if ds.get_file_total_size() <= max_size_filter]
-            
+
         if uvl_min.isdigit() or uvl_max.isdigit():
             results = [
                 ds for ds in results
@@ -117,5 +115,4 @@ def num_uvls(dataset, num_min, num_max):
     else:
         return (min_valid and number >= int(num_min)
                 or max_valid and number <= int(num_max))
-        
-        
+

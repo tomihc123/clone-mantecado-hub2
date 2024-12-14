@@ -48,13 +48,13 @@ def test_filter_by_publication_type(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets: {num}"
-    
+
     search_criteria = get_search_criteria(publication_type="error")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 6, f"Wrong number of datasets: {num}"
-    
+
     search_criteria = get_search_criteria(publication_type="annotationcollection")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -67,7 +67,7 @@ def test_filter_by_query_string(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets: {num}"
-    
+
     search_criteria = get_search_criteria(query="Sample dataset 3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -94,7 +94,7 @@ def test_filter_by_min_size(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 6, f"Wrong number of datasets for min_size filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="min_size:50000")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -139,7 +139,7 @@ def test_filter_by_max_size(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 4, f"Wrong number of datasets for max_size filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="max_size:100000")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -152,25 +152,25 @@ def test_filter_by_min_models(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 4, f"Wrong number of datasets for models_min filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_min:5")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets for models_min filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_min:3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 3, f"Wrong number of datasets for models_min filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_min:4")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 2, f"Wrong number of datasets for models_min filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_min:6")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -183,31 +183,31 @@ def test_filter_by_max_models(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 4, f"Wrong number of datasets for models_max filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_max:4")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 5, f"Wrong number of datasets for models_max filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_max:3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 4, f"Wrong number of datasets for models_max filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_max:2")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 3, f"Wrong number of datasets for models_max filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_max:1")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 2, f"Wrong number of datasets for models_max filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="models_max:0")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -220,25 +220,25 @@ def test_filter_by_tags(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 4, f"Wrong number of datasets for tags filter 'tag1': {num}"
-    
+
     search_criteria = get_search_criteria(query="tags:tag3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 2, f"Wrong number of datasets for tags filter 'tag3': {num}"
-    
+
     search_criteria = get_search_criteria(query="tags:tag1,tag2")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 2, f"Wrong number of datasets for tags filter 'tag3': {num}"
-    
+
     search_criteria = get_search_criteria(query="tags:tag1,tag3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets for tags filter 'tag3': {num}"
-    
+
     search_criteria = get_search_criteria(query="tags:tag5")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -251,7 +251,7 @@ def test_filter_by_author(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 2, f"Wrong number of datasets for author filter: {num}"
-    
+
     search_criteria = get_search_criteria(query="author:Super Mario")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
@@ -264,19 +264,19 @@ def test_combined_query_filters(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets for combined query filters: {num}"
-    
+
     search_criteria = get_search_criteria(query="min_size:100;models_max:2;tags:tag1;author:Super Mario")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 0, f"Wrong number of datasets for combined query filters: {num}"
-    
+
     search_criteria = get_search_criteria(query="max_size:5000;models_min:1;tags:tag3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 1, f"Wrong number of datasets for combined query filters: {num}"
-    
+
     search_criteria = get_search_criteria(query="min_size:5000;models_min:4;tags:tag1,tag3;author:Thor Odinson")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
