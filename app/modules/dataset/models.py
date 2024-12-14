@@ -79,7 +79,7 @@ class DataSet(db.Model):
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
 
     # Un dataset puede o no formar parte de una comunidad
-    community_id = db.Column(db.Integer, db.ForeignKey('community_id'), nullable=True)
+    community_id = db.Column(db.Integer, db.ForeignKey('community.id'), nullable=True)
 
     # Asigna el dataset a una comunidad
     def assign_to_community(self, community):

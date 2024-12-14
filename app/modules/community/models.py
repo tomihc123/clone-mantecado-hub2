@@ -9,9 +9,11 @@ community_members = db.Table('community_members',
 
 class Community(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Integer, nullable=False, unique=True)
+    name = db.Column(db.String(120), nullable=False)
     description = db.Column(db.Text, nullable=False)
+    owner_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
+    owner = db.relationship("User", backref="owned_communities", lazy=True)
     members = db.relationship('User', secondary=community_members,
                               backref=db.backref('joined_communities', lazy='dynamic'), cascade='all')
 
