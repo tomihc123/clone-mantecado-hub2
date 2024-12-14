@@ -9,17 +9,17 @@ class ExploreRepository(BaseRepository):
     def __init__(self):
         super().__init__(DataSet)
 
-    def filter_datasets(self, query_string, sorting="newest", tags=[], publication_type="any"):
-        # Crear un alias para `ds_meta_data` para evitar conflictos de alias.
+    def filter_datasets(self, query_string, sorting="newest", publication_type="any",uvl_min="",uvl_max=""):
+
         ds_meta_data_alias = aliased(DSMetaData)
-        author_meta_data_alias = aliased(DSMetaData)  # Nuevo alias para la segunda unión
+        author_meta_data_alias = aliased(DSMetaData)
         min_size_filter = None
         max_size_filter = None
 
-        # Inicia la consulta, usando el alias en la unión
+
         query = db.session.query(DataSet).join(ds_meta_data_alias, DataSet.ds_meta_data)
 
-        # Filtrar por tipo de publicación
+
         if publication_type != "any":
             matching_type = None
             for member in PublicationType:
@@ -28,58 +28,91 @@ class ExploreRepository(BaseRepository):
                     break
             if matching_type is not None:
                 query = query.filter(ds_meta_data_alias.publication_type == matching_type.name)
-
-        # Procesar el filtro de `query_string`
         query_filter = query_string.strip()
 
-        # Filtrar por autor
-        if query_filter.startswith('author:'):
-            author_filter = query_filter[7:].strip()
-            query = query.join(author_meta_data_alias).join(Author).filter(Author.name.ilike(f'%{author_filter}%'))
 
-        # Filtrar por tamaño mínimo
-        elif query_filter.startswith('min_size:'):
-            try:
-                min_size_filter = int(query_filter[9:].strip())
-            except ValueError:
-                min_size_filter = None
+        for filter_item in query_filter.split(';'):
 
-        # Filtrar por tamaño máximo
-        elif query_filter.startswith('max_size:'):
-            try:
-                max_size_filter = int(query_filter[9:].strip())
-            except ValueError:
-                max_size_filter = None
+            if filter_item.startswith('tags:'):
+                tag_value = filter_item[5:].strip()
+                query = query.filter(ds_meta_data_alias.tags.ilike(f'%{tag_value}%'))
 
-        # Filtrar por etiquetas
-        elif query_filter.startswith('tags:'):
-            tags_filter = query_filter[5:].strip()
-            query = query.filter(ds_meta_data_alias.tags.ilike(f'%{tags_filter}%'))
 
-        # Filtrar por título o tag(consulta general)
-        else:
-            query = query.filter(
-                or_(
-                    ds_meta_data_alias.title.ilike(f"%{query_filter}%"),
-                    ds_meta_data_alias.tags.ilike(f"%{query_filter}%")
+            elif filter_item.startswith('models_max:'):
+                models_max_value = filter_item[11:].strip()
+                uvl_max = models_max_value
+
+
+            elif filter_item.startswith('models_min:'):
+                models_min_value = filter_item[11:].strip()
+                uvl_min = models_min_value
+
+
+            elif filter_item.startswith('min_size:'):
+                try:
+                    min_size_filter = int(filter_item[9:].strip())
+                except ValueError:
+                    min_size_filter = None
+
+
+            elif filter_item.startswith('max_size:'):
+                try:
+                    max_size_filter = int(filter_item[9:].strip())
+                except ValueError:
+                    max_size_filter = None
+
+
+            elif filter_item.startswith('author:'):
+                author_name = filter_item[7:].strip()
+                query = query.join(author_meta_data_alias).join(Author).filter(Author.name.ilike(f'%{author_name}%'))
+
+
+            elif filter_item.startswith('title:'):
+                title_value = filter_item[6:].strip()
+                query = query.filter(ds_meta_data_alias.title.ilike(f'%{title_value}%'))
+
+
+            else:
+                query = query.filter(
+                    or_(
+                        ds_meta_data_alias.title.ilike(f"%{filter_item}%"),
+                        ds_meta_data_alias.tags.ilike(f"%{filter_item}%")
+                    )
                 )
-            )
 
-        # Ordenar resultados
+
         if sorting == "oldest":
             query = query.order_by(DataSet.created_at.asc())
         else:
             query = query.order_by(DataSet.created_at.desc())
 
-        # Ejecutar la consulta y obtener todos los resultados
+
         results = query.all()
 
-        # Filtrar por tamaño mínimo después de obtener los resultados
+
         if min_size_filter is not None:
             results = [ds for ds in results if ds.get_file_total_size() >= min_size_filter]
 
-        # Filtrar por tamaño máximo después de obtener los resultados
+
         if max_size_filter is not None:
             results = [ds for ds in results if ds.get_file_total_size() <= max_size_filter]
 
+        if uvl_min.isdigit() or uvl_max.isdigit():
+            results = [
+                ds for ds in results
+                if num_uvls(ds, uvl_min, uvl_max)
+            ]
+
         return results
+
+def num_uvls(dataset, num_min, num_max):
+    max_valid = num_max.isdigit()
+    min_valid = num_min.isdigit()
+    number = dataset.get_files_count()
+
+    if min_valid and max_valid:
+        return number >= int(num_min) and number <= int(num_max)
+    else:
+        return (min_valid and number >= int(num_min)
+                or max_valid and number <= int(num_max))
+
