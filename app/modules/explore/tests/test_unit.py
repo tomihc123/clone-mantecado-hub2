@@ -1,9 +1,9 @@
-from app.modules.dataset.models import DataSet
 from app.modules.explore.services import ExploreService
 import pytest
 from app import create_app  # Assuming you have a function to create your app instance
 from app.modules.explore.repositories import ExploreRepository
 from unittest.mock import MagicMock
+
 
 @pytest.fixture
 def app():
@@ -11,21 +11,19 @@ def app():
     with app.app_context():  # Contexto gestionado
         yield app
 
+
 @pytest.fixture
 def explore_repository():
     return ExploreRepository()
 
-@pytest.fixture
-def mock_query():
-    
-    return MagicMock()
 
 @pytest.fixture
 def mock_query():
     # Mock the db session query to avoid hitting the actual database
     mock_query = MagicMock()
-    mock_query.all.return_value = []  # You can customize this to return test data
+    mock_query.all.return_value = []
     return mock_query
+
 
 @pytest.fixture
 def mock_repository(mocker):
@@ -35,29 +33,34 @@ def mock_repository(mocker):
 
 
 def test_filter_datasets_by_author(explore_repository, mock_query, app):
-    
+
     query_string = "author:John Doe"
     explore_repository.filter_datasets(query_string)
 
+
 def test_filter_datasets_by_tags(explore_repository, mock_query, app):
-    
+
     query_string = "tags:tag1"
     explore_repository.filter_datasets(query_string)
-    
+
+
 def test_filter_datasets_by_tags2(explore_repository, mock_query, app):
-    
+
     query_string = "tags:tag1,tag2"
     explore_repository.filter_datasets(query_string)
 
+
 def test_filter_datasets_by_min_size(explore_repository, mock_query, app):
-    
+
     query_string = "min_size:1000"
     explore_repository.filter_datasets(query_string)
-    
+
+
 def test_filter_datasets_by_max_size(explore_repository, mock_query, app):
-    
+
     query_string = "max_size:1000"
     explore_repository.filter_datasets(query_string)
+
 
 def test_filter_invalid_query():
     mock_repository = MagicMock()
@@ -79,10 +82,11 @@ def test_filter_invalid_query():
         assert results == []
 
         call_args = mock_repository.filter_datasets.call_args
-        assert call_args[0][0] == "invalid:query"  
+        assert call_args[0][0] == "invalid:query"
     except Exception as e:
         assert False, f"Unexpected exception occurred: {e}"
-    
+
+
 def test_filter_empty_query():
     mock_repository = MagicMock()
 
@@ -101,6 +105,6 @@ def test_filter_empty_query():
         )
 
         assert results == []
-        
+
     except Exception as e:
         assert False, f"Unexpected exception occurred: {e}"
