@@ -1,5 +1,6 @@
 import pytest
 
+
 @pytest.fixture(scope='module')
 def test_client(test_client):
     """
@@ -12,6 +13,7 @@ def test_client(test_client):
         pass
 
     yield test_client
+
 
 def test_sample_assertion(test_client):
     """
