@@ -1,10 +1,8 @@
 from locust import HttpUser, TaskSet, task
-from unittest.mock import patch
-from io import BytesIO
 
 
 class ProfileBehavior(TaskSet):
-    
+
     @task
     def test_edit_profile_page_get(self):
         """
@@ -89,7 +87,8 @@ class ProfileBehavior(TaskSet):
             print(f"Failed to search profiles with query 'NonExistentName': {response.status_code}")
         if b"No profiles found" not in response.content:
             print("Expected 'No profiles found' for query 'NonExistentName', but it was not found")
-    
+
+
 class UserBehavior(HttpUser):
     tasks = [ProfileBehavior]
     min_wait = 5000  # Tiempo mínimo entre tareas (5 segundos)

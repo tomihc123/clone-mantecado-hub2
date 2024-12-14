@@ -8,6 +8,7 @@ from app.modules.profile.forms import UserProfileForm
 from app.modules.profile.services import UserProfileService
 from flask import flash
 
+
 @profile_bp.route("/profile/edit", methods=["GET", "POST"])
 @login_required
 def edit_profile():
@@ -25,6 +26,7 @@ def edit_profile():
         )
 
     return render_template("profile/edit.html", form=form)
+
 
 @profile_bp.route('/profile/summary')
 @login_required
@@ -49,6 +51,7 @@ def my_profile():
         pagination=user_datasets_pagination,
         total_datasets=total_datasets_count
     )
+
 
 @profile_bp.route('/profile/view/<int:user_id>')
 @login_required
@@ -81,6 +84,7 @@ def view_profile(user_id):
         pagination=user_datasets_pagination,
         total_datasets=total_datasets_count
     )
+
 
 @profile_bp.route('/profile/search', methods=['GET'])
 @login_required

@@ -7,6 +7,7 @@ from flask import jsonify
 
 logger = logging.getLogger(__name__)
 
+
 @public_bp.route("/")
 def index():
     logger.info("Access index")
@@ -33,6 +34,7 @@ def index():
         total_feature_model_views=total_feature_model_views
     )
 
+
 @public_bp.route("/dashboard")
 def dashboard():
     try:
@@ -57,8 +59,7 @@ def dashboard():
             total_dataset_views=total_dataset_views,
             total_feature_model_views=total_feature_model_views
         )
-    
+
     except Exception as e:
         print(f"Error en la obtención de datos para el dashboard: {str(e)}")
         return jsonify({"error": f"Hubo un problema al obtener los datos: {str(e)}"}), 500
-

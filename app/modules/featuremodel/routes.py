@@ -1,4 +1,3 @@
-from flask import render_template
 from app.modules.featuremodel import featuremodel_bp
 from flask import jsonify, render_template, request
 from flask_login import current_user, login_required
@@ -8,6 +7,7 @@ from app.modules.dataset.services import RatingService
 @featuremodel_bp.route('/featuremodel', methods=['GET'])
 def index():
     return render_template('featuremodel/index.html')
+
 
 @featuremodel_bp.route("/model/rate", methods=["POST"])
 @login_required
