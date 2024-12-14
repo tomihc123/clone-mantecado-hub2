@@ -13,7 +13,7 @@ def wait_for_page_to_load(driver, timeout=4):
     WebDriverWait(driver, timeout).until(
         lambda driver: driver.execute_script("return document.readyState") == "complete"
     )
-    
+
 
 def test_featuremodel_index():
 
@@ -39,7 +39,7 @@ def test_featuremodel_index():
 
         # Close the browser
         close_driver(driver)
-        
+
 
 def test_rate_model():
     driver = initialize_driver()

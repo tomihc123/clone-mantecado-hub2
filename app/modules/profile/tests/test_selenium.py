@@ -1,4 +1,3 @@
-import os
 import time
 
 from selenium.webdriver.common.by import By
@@ -13,6 +12,7 @@ def wait_for_page_to_load(driver, timeout=4):
     WebDriverWait(driver, timeout).until(
         lambda driver: driver.execute_script("return document.readyState") == "complete"
     )
+
 
 def test_search_and_view_profile():
     """
@@ -53,7 +53,7 @@ def test_search_and_view_profile():
         assert card_body.is_displayed(), "El perfil no se cargó correctamente o falta el 'card-body'."
 
         print("Prueba de búsqueda y visualización de perfil: OK")
-    
+
     finally:
         close_driver(driver)
 
@@ -102,7 +102,7 @@ def test_edit_profile():
         assert success_message.is_displayed(), "El mensaje de éxito no se mostró correctamente."
 
         print("Prueba de edición de perfil: OK")
-    
+
     finally:
         close_driver(driver)
 
