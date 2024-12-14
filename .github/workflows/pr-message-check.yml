@@ -1,0 +1,22 @@
+name: Pull Request Message Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  pr-check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Validate Pull Request Title and Description
+        run: |
+          # Validar el título del PR
+          title="${{ github.event.pull_request.title }}"
+          if ! [[ "$title" =~ ^.{10,50}$ ]]; then
+            echo "Error: El título del Pull Request debe tener entre 10 y 50 caracteres."
+            exit 1
+          fi
+
+          echo "Pull Request validado correctamente."
