@@ -178,7 +178,7 @@ def test_rate_dataset():
 
     finally:
         close_driver(driver)
-        
+
 
 # Call the test function
 test_upload_dataset()

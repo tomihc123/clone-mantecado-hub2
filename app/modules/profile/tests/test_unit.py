@@ -37,6 +37,7 @@ def test_edit_profile_page_get(test_client):
 
     logout(test_client)
 
+
 def test_search_user_profiles(test_client):
     """
     Test searching for user profiles by name or surname.
@@ -105,7 +106,8 @@ def test_search_empty_query(test_client):
 
     # Cerrar sesión después de las pruebas
     logout(test_client)
-    
+
+
 def test_search_single_character(test_client):
     """
     Test searching with a single character.
@@ -121,6 +123,7 @@ def test_search_single_character(test_client):
 
     # Cerrar sesión después de las pruebas
     logout(test_client)
+
 
 def test_search_with_extra_spaces(test_client):
     """

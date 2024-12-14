@@ -141,7 +141,7 @@ class DataSetService(BaseService):
     def get_uvlhub_doi(self, dataset: DataSet) -> str:
         domain = os.getenv('DOMAIN', 'localhost')
         return f'http://{domain}/doi/{dataset.ds_meta_data.dataset_doi}'
-    
+
     def download_all_datasets(self):
         return self.repository.download_all_datasets()
 
@@ -234,12 +234,13 @@ class SizeService():
         else:
             return f'{round(size / (1024 ** 3), 2)} GB'
 
+
 class RatingService:
     @staticmethod
     def add_rating(user_id, dataset_id, rating):
         # Verifica si el usuario ya ha valorado el dataset
         existing_rating = Rating.query.filter_by(user_id=user_id, dataset_id=dataset_id).first()
-        
+
         if existing_rating:
             # Si ya existe una valoración, actualízala
             existing_rating.rating = rating
@@ -247,25 +248,27 @@ class RatingService:
             # Si no existe, crea una nueva valoración
             new_rating = Rating(user_id=user_id, dataset_id=dataset_id, rating=rating)
             db.session.add(new_rating)
-        
+
         db.session.commit()  # Guarda los cambios en la base de datos
+
     @staticmethod
     def get_average_rating(dataset_id):
         # Obtén todas las valoraciones para el dataset específico
         ratings = Rating.query.filter_by(dataset_id=dataset_id).all()
-    
+
         # Si no hay valoraciones, devuelve None
         if not ratings:
             return None
-    
+
         # Calcula el promedio de las valoraciones y redondea a dos decimales
         average_rating = sum(r.rating for r in ratings) / len(ratings)
         return round(average_rating, 2)
+
     @staticmethod
     def add_model_rating(user_id, model_id, rating):
         # Verifica si el usuario ya ha valorado este modelo específico
         existing_rating = ModelRating.query.filter_by(user_id=user_id, model_id=model_id).first()
-        
+
         if existing_rating:
             # Si ya existe una valoración, actualízala
             existing_rating.rating = rating
@@ -273,16 +276,16 @@ class RatingService:
             # Si no existe, crea una nueva valoración
             new_rating = ModelRating(user_id=user_id, model_id=model_id, rating=rating)
             db.session.add(new_rating)
-        
+
         db.session.commit()  # Guarda los cambios en la base de datos
-    
+
     @staticmethod
     def get_average_model_rating(model_id):
         # Obtiene todas las valoraciones para el modelo específico
         ratings = ModelRating.query.filter_by(model_id=model_id).all()
         if not ratings:
             return None  # Devuelve None si no hay valoraciones
-        
+
         # Calcula la media de las valoraciones
         average_rating = sum(r.rating for r in ratings) / len(ratings)
         return round(average_rating, 2)

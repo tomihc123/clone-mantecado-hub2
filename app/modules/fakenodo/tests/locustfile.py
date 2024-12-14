@@ -11,7 +11,7 @@ class DepositionBehavior(TaskSet):
     def create_deposition(self):
         response = self.client.get("/depositions/create")
         csrf_token = get_csrf_token(response)
-        
+
         response = self.client.post("/depositions/create", data={
             "title": fake.sentence(nb_words=6),
             "description": fake.text(),

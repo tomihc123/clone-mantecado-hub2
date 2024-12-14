@@ -1,13 +1,12 @@
 import pytest
 from unittest.mock import patch, MagicMock
 from app.modules.notepad.services import NotepadService
-from app.modules.notepad.models import Notepad
 from app.modules.auth.models import User
 from app import db
 from app.modules.conftest import login, logout
-from app.modules.auth.models import User
 from app.modules.profile.models import UserProfile
 from flask_login import current_user
+
 
 @pytest.fixture(scope="module")
 def test_client(test_client):
@@ -15,14 +14,21 @@ def test_client(test_client):
     Extends the test_client fixture to add additional specific data for module testing.
     """
     with test_client.application.app_context():
-        # Add HERE new elements to the database that you want to exist in the test context.
-        # DO NOT FORGET to use db.session.add(<element>) and db.session.commit() to save the data.
-        pass
+        user_test = User(email='user@example.com', password='test1234')
+        db.session.add(user_test)
+        db.session.commit()
+
+        profile = UserProfile(user_id=user_test.id, name="Name", surname="Surname")
+        db.session.add(profile)
+        db.session.commit()
+
     yield test_client
+
 
 @pytest.fixture
 def notepad_service():
     return NotepadService()
+
 
 def test_get_all_by_user(notepad_service):
     with patch.object(notepad_service.repository, 'get_all_by_user') as mock_get_all:
@@ -35,6 +41,7 @@ def test_get_all_by_user(notepad_service):
         assert result == mock_notepads
         assert len(result) == 2
         mock_get_all.assert_called_once_with(user_id)
+
 
 def test_create(notepad_service):
     with patch.object(notepad_service.repository, 'create') as mock_create:
@@ -51,6 +58,7 @@ def test_create(notepad_service):
         assert result.id == 1
         mock_create.assert_called_once_with(title=title, body=body, user_id=user_id)
 
+
 def test_update(notepad_service):
     with patch.object(notepad_service.repository, 'update') as mock_update:
         mock_notepad = MagicMock(id=1)
@@ -65,6 +73,7 @@ def test_update(notepad_service):
         assert result == mock_notepad
         mock_update.assert_called_once_with(notepad_id, title=title, body=body)
 
+
 def test_delete(notepad_service):
     with patch.object(notepad_service.repository, 'delete') as mock_delete:
         mock_delete.return_value = True
@@ -73,22 +82,6 @@ def test_delete(notepad_service):
         result = notepad_service.delete(notepad_id)
 
         assert result is True
-        
-@pytest.fixture(scope="module")
-def test_client(test_client):
-    """
-    Extends the test_client fixture to add additional specific data for module testing.
-    """
-    with test_client.application.app_context():
-        user_test = User(email='user@example.com', password='test1234')
-        db.session.add(user_test)
-        db.session.commit()
-
-        profile = UserProfile(user_id=user_test.id, name="Name", surname="Surname")
-        db.session.add(profile)
-        db.session.commit()
-
-    yield test_client
 
 
 def test_get_notepad(test_client):
@@ -118,6 +111,7 @@ def test_get_notepad(test_client):
     assert b'Notepad2' in response.data, "The notepad title is not present on the page."
 
     logout(test_client)
+
 
 def test_edit_notepad(test_client):
     """
@@ -154,6 +148,7 @@ def test_edit_notepad(test_client):
         assert notepad.body == 'This is the edited body of notepad3.', "The notepad body was not updated."
 
     logout(test_client)
+
 
 def test_delete_notepad(test_client):
     """
