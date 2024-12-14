@@ -3,7 +3,7 @@ name: Deploy to Render
 on:
     push:
       tags:
-      - 'v*' 
+      - 'v*'
     pull_request:
       branches:
         - main
@@ -63,4 +63,8 @@ jobs:
         env:
           deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
+          if [ -z "$deploy_url" ]; then
+            echo "Error: deploy_url is empty or not set."
+            exit 1
+          fi
           curl "$deploy_url"
