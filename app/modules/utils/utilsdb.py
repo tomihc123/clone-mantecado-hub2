@@ -13,12 +13,12 @@ from app.modules.featuremodel.models import FMMetaData, FeatureModel
 from datetime import datetime, timezone
 from dotenv import load_dotenv
 
-def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN, tags="",
+def create_dataset_db(dataset_id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN, tags="",
                       date="", valid=True, should_file_exist=True, authors=None, total_file_size=None, num_files=None):
     if authors is None:
-        authors = [{"name": f"Author {id}", "affiliation": "Affiliation", "orcid": f"orcid{id}"}]
+        authors = [{"name": f"Author {dataset_id}", "affiliation": "Affiliation", "orcid": f"orcid{dataset_id}"}]
 
-    user_test = User(email=f'user{id}@example.com', password='test1234')
+    user_test = User(email=f'user{dataset_id}@example.com', password='test1234')
     db.session.add(user_test)
     db.session.commit()
 
@@ -27,12 +27,12 @@ def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN,
     db.session.commit()
 
     ds_meta_data = DSMetaData(
-            deposition_id=id,
-            title=f'Sample dataset {id}',
-            description=f'Description for dataset {id}',
+            deposition_id=dataset_id,
+            title=f'Sample dataset {dataset_id}',
+            description=f'Description for dataset {dataset_id}',
             publication_type=publication_type,
-            publication_doi=f'10.1234/dataset{id}',
-            dataset_doi=f'10.1234/dataset{id}',
+            publication_doi=f'10.1234/dataset{dataset_id}',
+            dataset_doi=f'10.1234/dataset{dataset_id}',
             tags=tags,
             ds_metrics_id=ds_metrics.id
         )
@@ -55,9 +55,9 @@ def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN,
     db.session.commit()
 
     fm_meta_data = FMMetaData(
-            uvl_filename=f'file{id}.uvl',
-            title=f'Feature Model {id}',
-            description=f'Description for feature model {id}',
+            uvl_filename=f'file{dataset_id}.uvl',
+            title=f'Feature Model {dataset_id}',
+            description=f'Description for feature model {dataset_id}',
             publication_type=publication_type,
             publication_doi='10.1234/fm1',
             tags=tags,
@@ -76,7 +76,7 @@ def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN,
     if should_file_exist:
         load_dotenv()
         working_dir = os.getenv('WORKING_DIR', '')
-        file_name = f'file{id % 12}.uvl' if valid else 'invalidfile.uvl'
+        file_name = f'file{dataset_id % 12}.uvl' if valid else 'invalidfile.uvl'
         src_folder = os.path.join(working_dir, 'app', 'modules', 'dataset', 'uvl_examples')
 
         dest_folder = os.path.join(working_dir, 'uploads', f'user_{user_test.id}', f'dataset_{dataset.id}')
@@ -87,7 +87,7 @@ def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN,
 
         uvl_file = Hubfile(
             name=file_name,
-            checksum=f'checksum{id}',
+            checksum=f'checksum{dataset_id}',
             size=os.path.getsize(file_path),
             feature_model_id=feature_model.id
         )
@@ -100,12 +100,12 @@ def create_dataset_db(id, publication_type=PublicationType.DATA_MANAGEMENT_PLAN,
 
         if num_files is not None:
             for i in range(1, num_files):
-                additional_file_name = f'file{id % 12 + i}.uvl'
+                additional_file_name = f'file{dataset_id % 12 + i}.uvl'
                 shutil.copy(os.path.join(src_folder, additional_file_name), dest_folder)
 
                 additional_uvl_file = Hubfile(
                     name=additional_file_name,
-                    checksum=f'checksum{id + i}',
+                    checksum=f'checksum{dataset_id + i}',
                     size=os.path.getsize(file_path),
                     feature_model_id=feature_model.id
                 )
