@@ -1,6 +1,6 @@
 """create_notepad_model
 
-Revision ID: d35838031251
+Revision ID: 002
 Revises: 001
 Create Date: 2024-10-21 23:55:41.922562
 
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = 'd35838031251'
+revision = '002'
 down_revision = '001'
 branch_labels = None
 depends_on = None
