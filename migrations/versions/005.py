@@ -1,7 +1,7 @@
 """Add communities tables
 
-Revision ID: 0e548bd31bb8
-Revises: 001
+Revision ID: 005
+Revises: 004
 Create Date: 2024-12-14 14:39:39.967209
 
 """
@@ -10,8 +10,8 @@ import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
 # revision identifiers, used by Alembic.
-revision = '0e548bd31bb8'
-down_revision = '4d29c3fa78bd'
+revision = '005'
+down_revision = '004'
 branch_labels = None
 depends_on = None
 
