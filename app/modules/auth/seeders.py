@@ -28,7 +28,7 @@ class AuthSeeder(BaseSeeder):
                 "orcid": "",
                 "affiliation": "Some University",
                 "name": name[0],
-                "surname": name[1],
+                "surname": name[1]
             }
             user_profile = UserProfile(**profile_data)
             user_profiles.append(user_profile)

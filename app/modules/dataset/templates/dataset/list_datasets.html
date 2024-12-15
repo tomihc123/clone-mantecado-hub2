@@ -50,9 +50,16 @@
                                             <a href="{{ url_for('dataset.download_dataset', dataset_id=dataset.id) }}">
                                                 <i data-feather="download"></i>
                                             </a>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
+                                            <div class="dropdown d-inline-block align-middle">
+                                                <button class="btn btn-link dropdown-toggle" type="button" id="communityDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i data-feather="globe"></i>
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="communityDropdown">
+                                                    {% if not (current_user.owned_communities) %}
+                                                        <li><span class="dropdown-item">No communities</span></li>
+                                                    {% endif %}
+                                                    {% endfor %}
+                                                    
                             </tbody>
                         </table>
                     </div>

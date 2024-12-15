@@ -78,6 +78,14 @@ class DataSet(db.Model):
     ds_meta_data = db.relationship('DSMetaData', backref=db.backref('data_set', uselist=False))
     feature_models = db.relationship('FeatureModel', backref='data_set', lazy=True, cascade="all, delete")
 
+    # Un dataset puede o no formar parte de una comunidad
+    community_id = db.Column(db.Integer, db.ForeignKey('community.id'), nullable=True)
+
+    # Asigna el dataset a una comunidad
+    def assign_to_community(self, community):
+        self.community_id = community.id
+        db.session.commit()
+
     def name(self):
         return self.ds_meta_data.title
 
