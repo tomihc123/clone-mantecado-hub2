@@ -19,7 +19,8 @@
                         <h5 class="card-title">{{ community.name }}</h5>
                         <p class="card-text">{{ community.description }}</p>
                     </div>
-                    {% if current_user.is_authenticated and community.owner_id == current_user.id %}
+                    {% if current_user.is_authenticated %}
+                    {% if community.owner_id == current_user.id %}
                     <div class="card-footer text-end">
                         <form action="{{ url_for('community.delete_community', community_id=community.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-danger btn-sm">Delete Community</button>
@@ -32,14 +33,14 @@
                         </a>
                     </div>
                     {% endif %}
-                    {% if community in other_communities %}
+                    {% if community.owner_id != current_user.id and current_user not in community.members %}
                     <div class="card-footer text-end">
                         <form action="{{ url_for('community.join_community', community_id=community.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-primary btn-sm">Join Community</button>
                         </form>
                     </div>
                     {% endif %}
-                    {% if community in member_communities and community.owner_id != current_user.id %}
+                    {% if community.owner_id != current_user.id and current_user in community.members %}
                     <div class="card-footer text-end">
                         <form action="{{ url_for('community.leave_community', community_id=community.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-danger btn-sm">Leave Community</button>
@@ -48,6 +49,7 @@
                             <i data-feather="eye"></i>
                         </a>
                     </div>
+                    {% endif %}
                     {% endif %}
                 </div>
             </a>

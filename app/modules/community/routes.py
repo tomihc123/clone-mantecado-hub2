@@ -38,8 +38,7 @@ def index():
         # Display all communities for unauthenticated users
         sorted_communities = all_communities
 
-    return render_template('index.html', communities=sorted_communities,
-                           other_communities=other_communities, member_communities=member_communities)
+    return render_template('index.html', communities=sorted_communities)
 
 
 @community_bp.route('/community/create', methods=['GET', 'POST'])
