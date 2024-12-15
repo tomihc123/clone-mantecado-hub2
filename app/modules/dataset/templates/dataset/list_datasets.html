@@ -55,13 +55,6 @@
                                                     <i data-feather="globe"></i>
                                                 </button>
                                                 <ul class="dropdown-menu" aria-labelledby="communityDropdown">
-                                                    {% for community in current_user.owned_communities %}
-                                                        <li>
-                                                            <a class="dropdown-item" href="{{ url_for('community.add_dataset_to_community', community_id=community.id, dataset_id=dataset.id) }}" method="POST">
-                                                                {{ community.name }}
-                                                            </a>
-                                                        </li>
-                                                    {% endfor %}
                                                     {% if not (current_user.owned_communities) %}
                                                         <li><span class="dropdown-item">No communities</span></li>
                                                     {% endif %}

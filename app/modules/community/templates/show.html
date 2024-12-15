@@ -81,6 +81,21 @@
         </div>
     </div>
 {% endfor %}
+<p> Not shared datasets </p>
+{% for dataset in user_dataset %}
+{% if dataset not in datasets %}
+    <div class="card">
+        <div class="card-body">
+            {{ dataset.ds_meta_data.title }}
+        </div>
+        <div class="card-footer text-end">
+            <form action="{{ url_for('community.add_dataset_to_community', community_id=community.id, dataset_id=dataset.id) }}" method="POST" style="display:inline;">
+                <button type="submit" class="btn btn-warning btn-sm">Add Community</button>
+            </form>
+        </div>
+    <div>
+{%endif%}
+{% endfor %}
 {% endblock %}
 
 {% block scripts %}

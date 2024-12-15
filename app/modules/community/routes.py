@@ -1,13 +1,15 @@
-from flask import render_template, flash, jsonify, redirect, request, url_for
+from flask import render_template, flash, jsonify, redirect, url_for
 from app.modules.community import community_bp  # Ensure community_bp is imported
 from flask_login import current_user, login_required
 from app.modules.community.forms import CommunityForm
 from app.modules.community.models import Community
 from app.modules.community.services import CommunityService
 from app.modules.dataset.models import DataSet
+from app.modules.dataset.services import DataSetService
 from app import db
 
 community_service = CommunityService()
+dataset_service = DataSetService()
 
 
 @community_bp.route('/community', methods=['GET'])
@@ -36,7 +38,8 @@ def index():
         # Display all communities for unauthenticated users
         sorted_communities = all_communities
 
-    return render_template('index.html', communities=sorted_communities)
+    return render_template('index.html', communities=sorted_communities,
+                           other_communities=other_communities, member_communities=member_communities)
 
 
 @community_bp.route('/community/create', methods=['GET', 'POST'])
@@ -112,18 +115,16 @@ def update_community(community_id):
 def view_community(community_id):
     """View a specific community."""
     community = community_service.get_or_404(community_id)
+    user_id = current_user.id
+    user_dataset = dataset_service.get_synchronized(user_id)
     datasets = community.datasets
-    return render_template('show.html', community=community, datasets=datasets)
+    return render_template('show.html', community=community, datasets=datasets, user_dataset=user_dataset)
 
 
-@community_bp.route('/community/join', methods=['POST'])
+@community_bp.route('/community/join/<int:community_id>', methods=['POST'])
 @login_required
-def join_community():
+def join_community(community_id):
     """Join a community."""
-    community_id = request.json.get('community_id')
-    if not community_id:
-        return jsonify({'error': 'Community ID is required'}), 400
-
     community = Community.query.get(community_id)
     if not community:
         return jsonify({'error': 'Community not found'}), 404
@@ -136,10 +137,29 @@ def join_community():
 
     community.members.append(current_user)
     db.session.commit()
-    return jsonify({'message': 'You have successfully joined the community'})
+    return redirect(url_for('community.index'))
 
 
-@community_bp.route('/community/<int:community_id>/add_dataset/<int:dataset_id>', methods=['POST, GET'])
+@community_bp.route('/community/leave/<int:community_id>', methods=['POST'])
+@login_required
+def leave_community(community_id):
+    """Join a community."""
+    community = Community.query.get(community_id)
+    if not community:
+        return jsonify({'error': 'Community not found'}), 404
+
+    if community.owner_id == current_user.id:
+        return jsonify({'error': 'You are the owner of this community'}), 403
+
+    if not (current_user in community.members):
+        return jsonify({'error': 'You are not a member of this community'}), 403
+
+    community.members.remove(current_user)
+    db.session.commit()
+    return redirect(url_for('community.index'))
+
+
+@community_bp.route('/community/<int:community_id>/add_dataset/<int:dataset_id>', methods=['POST'])
 @login_required
 def add_dataset_to_community(community_id, dataset_id):
     """Add a dataset to a specific community."""
@@ -160,7 +180,7 @@ def add_dataset_to_community(community_id, dataset_id):
 
 @community_bp.route('/community/<int:community_id>', methods=['POST'])
 @login_required
-def leave_community(community_id):
+def delete_community(community_id):
     """Leave a community."""
     community = community_service.get_or_404(community_id)
     if community.owner_id != current_user.id:

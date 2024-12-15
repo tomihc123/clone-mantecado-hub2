@@ -13,7 +13,7 @@
     <div class="row">
         {% for community in communities %}
         <div class="col-12 col-md-4 mb-4">
-            <a href="{{ url_for('community.view_community', community_id=community.id) }}" class="text-decoration-none">
+            <a class="text-decoration-none">
                 <div class="card h-100 shadow-sm border-light">
                     <div class="card-body">
                         <h5 class="card-title">{{ community.name }}</h5>
@@ -21,12 +21,32 @@
                     </div>
                     {% if current_user.is_authenticated and community.owner_id == current_user.id %}
                     <div class="card-footer text-end">
-                        <form action="{{ url_for('community._community', community_id=community.id) }}" method="POST" style="display:inline;">
+                        <form action="{{ url_for('community.delete_community', community_id=community.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-danger btn-sm">Delete Community</button>
                         </form>
-                        <form action="{{ url_for('community.edit_community', community_id=community.id) }}" method="POST" style="display:inline;">
+                        <form action="{{ url_for('community.update_community', community_id=community.id) }}" method="POST" style="display:inline;">
                             <button type="submit" class="btn btn-warning btn-sm">Edit Community</button>
                         </form>
+                        <a href="{{ url_for('community.view_community', community_id=community.id) }}">
+                            <i data-feather="eye"></i>
+                        </a>
+                    </div>
+                    {% endif %}
+                    {% if community in other_communities %}
+                    <div class="card-footer text-end">
+                        <form action="{{ url_for('community.join_community', community_id=community.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-primary btn-sm">Join Community</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                    {% if community in member_communities and community.owner_id != current_user.id %}
+                    <div class="card-footer text-end">
+                        <form action="{{ url_for('community.leave_community', community_id=community.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-danger btn-sm">Leave Community</button>
+                        </form>
+                        <a href="{{ url_for('community.view_community', community_id=community.id) }}">
+                            <i data-feather="eye"></i>
+                        </a>
                     </div>
                     {% endif %}
                 </div>
