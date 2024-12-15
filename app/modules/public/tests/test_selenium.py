@@ -6,15 +6,18 @@ from selenium.webdriver.support import expected_conditions as EC
 from core.environment.host import get_host_for_selenium_testing
 from core.selenium.common import initialize_driver, close_driver
 
+
 def wait_for_page_to_load(driver, timeout=10):
     WebDriverWait(driver, timeout).until(
         lambda driver: driver.execute_script("return document.readyState") == "complete"
     )
 
+
 def wait_for_element_to_be_clickable(driver, by, value, timeout=10):
     WebDriverWait(driver, timeout).until(
         EC.element_to_be_clickable((by, value))
     )
+
 
 def close_modal_if_present(driver):
     try:
@@ -22,8 +25,9 @@ def close_modal_if_present(driver):
         if modal_close_button.is_displayed():
             modal_close_button.click()
             print("Modal cerrado.")
-    except Exception as e:
+    except Exception:
         print("No se encontró un modal o no está visible.")
+
 
 def test_access_dashboard():
     driver = initialize_driver()
@@ -37,7 +41,7 @@ def test_access_dashboard():
         close_modal_if_present(driver)
 
         dashboard_button = driver.find_element(By.XPATH, "//a[text()='Ver Dashboard']")
-        
+
         WebDriverWait(driver, 10).until(EC.element_to_be_clickable(dashboard_button))
 
         driver.execute_script("arguments[0].scrollIntoView(true);", dashboard_button)
@@ -61,6 +65,7 @@ def test_access_dashboard():
 
     finally:
         close_driver(driver)
+
 
 if __name__ == "__main__":
     test_access_dashboard()

@@ -178,8 +178,45 @@ def test_rate_dataset():
 
     finally:
         close_driver(driver)
-        
+
+
+def test_download_all_datasets():
+    """
+    Verifica que los datasets se descarguen correctamente al hacer clic en el botón de "Download all datasets".
+    """
+    driver = initialize_driver()
+
+    try:
+        host = get_host_for_selenium_testing()
+
+        # Abre la página principal
+        driver.get(host)
+        wait_for_page_to_load(driver)
+
+        # Encuentra el botón "Download all datasets"
+        download_button = driver.find_element(By.LINK_TEXT, "Download all datasets")
+        download_button.click()
+
+        # Espera unos segundos para la descarga (ajustar si es necesario)
+        time.sleep(5)
+
+        # Verifica la existencia de archivos en el directorio de descargas
+        download_dir = os.path.expanduser("~/Descargas")
+        downloaded_files = os.listdir(download_dir)
+
+        # Depuración: imprime los archivos detectados
+        print("Archivos en el directorio de descargas:", downloaded_files)
+
+        assert any(file.endswith(".zip") for file in downloaded_files), "No se descargó ningún archivo ZIP"
+
+        print("Descarga de datasets verificada correctamente.")
+
+    finally:
+        # Cierra el navegador
+        close_driver(driver)
+
 
 # Call the test function
 test_upload_dataset()
+test_download_all_datasets()
 test_rate_dataset()

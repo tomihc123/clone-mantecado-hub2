@@ -2,7 +2,7 @@ name: Commit Message Check
 
 on:
   push:
-    branches:
+    branches-ignore:
       - main
 
 jobs:
@@ -18,6 +18,12 @@ jobs:
           # Obtener los mensajes de commit
           commits=$(git log --format=%s -n 10)  # Cambia el número si necesitas más commits
           echo "$commits" | while read -r commit; do
+            if [[ "$commit" =~ ^Merge\ pull\ request ]]; then
+              # Ignorar los commits de merge generados automáticamente
+              echo "Skipping merge commit: '$commit'"
+              continue
+            fi
+
             if ! [[ "$commit" =~ ^(Feat|Fix|Style|Refactor|Test|Chore):\ .+ ]]; then
               echo "Error: El mensaje de commit '$commit' no sigue la plantilla requerida."
               echo "Formato correcto: [Tipo]: Descripción breve en español"
