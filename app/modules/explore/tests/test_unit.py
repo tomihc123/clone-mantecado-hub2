@@ -245,19 +245,19 @@ def test_filter_by_tags(test_client):
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
-    assert num == 2, f"Wrong number of datasets for tags filter 'tag3': {num}"
+    assert num == 2, f"Wrong number of datasets for tags filter 'tag1,tag2': {num}"
 
     search_criteria = get_search_criteria(query="tags:tag1,tag3")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
-    assert num == 1, f"Wrong number of datasets for tags filter 'tag3': {num}"
+    assert num == 1, f"Wrong number of datasets for tags filter 'tag1,tag3': {num}"
 
     search_criteria = get_search_criteria(query="tags:tag5")
     response = test_client.post("/explore", json=search_criteria)
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
-    assert num == 0, f"Wrong number of datasets for tags filter 'tag3': {num}"
+    assert num == 0, f"Wrong number of datasets for tags filter 'tag5': {num}"
 
 
 def test_filter_by_author(test_client):
@@ -272,6 +272,50 @@ def test_filter_by_author(test_client):
     assert response.status_code == 200, "The explore page could not be accessed."
     num = len(response.get_json())
     assert num == 0, f"Wrong number of datasets for author filter: {num}"
+
+
+def test_filter_by_query_publication_type(test_client):
+    search_criteria = get_search_criteria(query="publication_type:book")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 2, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:any")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 6, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:report")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 1, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:error")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 6, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:annotationcollection")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 1, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:none")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 0, f"Wrong number of datasets for publication type filter: {num}"
+
+    search_criteria = get_search_criteria(query="publication_type:")
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    num = len(response.get_json())
+    assert num == 6, f"Wrong number of datasets for publication type filter: {num}"
 
 
 def test_combined_query_filters(test_client):
