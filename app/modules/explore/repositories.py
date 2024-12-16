@@ -62,6 +62,16 @@ class ExploreRepository(BaseRepository):
                 title_value = filter_item[6:].strip()
                 query = query.filter(ds_meta_data_alias.title.ilike(f'%{title_value}%'))
 
+            elif filter_item.startswith('publication_type:'):
+                pub_type_value = filter_item[len('publication_type:'):].strip().lower()
+                matching_type = None
+                for member in PublicationType:
+                    if member.value.lower() == pub_type_value:
+                        matching_type = member
+                        break
+                if matching_type is not None:
+                    query = query.filter(ds_meta_data_alias.publication_type == matching_type.name)
+
             else:
                 query = query.filter(
                     or_(

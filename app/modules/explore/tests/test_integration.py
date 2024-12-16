@@ -89,6 +89,28 @@ def test_user_combined_query_filters(test_client):
     logout(test_client)
 
 
+def test_user_login_and_filter_by_publication(test_client):
+    """
+    Test user login followed by filtering datasets by publication type.
+    """
+    # Log in the test user
+    login_response = login(test_client, "user@example.com", "test1234")
+    assert login_response.status_code == 200, "Login was unsuccessful."
+
+    # Filter by publication
+    search_criteria = {
+        "query": "publication_type:book",
+        "sorting": "newest",
+        "publication_type": "any",
+    }
+    response = test_client.post("/explore", json=search_criteria)
+    assert response.status_code == 200, "The explore page could not be accessed."
+    data = response.get_json()
+    assert len(data) == 2, "Wrong number of datasets returned for the publication filter."
+
+    logout(test_client)
+
+
 def test_user_invalid_query(test_client):
     """
     Test user login followed by an invalid query.
