@@ -18,8 +18,8 @@ def wait_datasets_to_change():
     time.sleep(0.5)
 
 
-def set_input(driver, input, value):
-    query_field = driver.find_element(By.ID, input)
+def set_input(driver, field_id, value):
+    query_field = driver.find_element(By.ID, field_id)
 
     driver.execute_script("""
         arguments[0].value = arguments[1];
@@ -27,8 +27,8 @@ def set_input(driver, input, value):
     """, query_field, value)
 
 
-def set_checkbox(driver, input, value):
-    query_field = driver.find_element(By.ID, input)
+def set_checkbox(driver, field_id, value):
+    query_field = driver.find_element(By.ID, field_id)
 
     driver.execute_script("""
         arguments[0].checked = arguments[1];
