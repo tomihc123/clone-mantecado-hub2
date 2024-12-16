@@ -1,14 +1,10 @@
 import unittest
-from flask import Flask
 from unittest.mock import patch
 from app import create_app
 
+
 class TestIntegrationDashboard(unittest.TestCase):
     def setUp(self):
-        """
-        Configuración inicial para la prueba.
-        Crea una aplicación Flask y un cliente de pruebas.
-        """
         self.app = create_app()
         self.client = self.app.test_client()
 
@@ -16,7 +12,6 @@ class TestIntegrationDashboard(unittest.TestCase):
 def test_dashboard_render_with_mocked_data(test_client):
     with patch("app.modules.public.routes.DataSetService") as MockDataSetService, \
          patch("app.modules.public.routes.FeatureModelService") as MockFeatureModelService:
-        
         MockDataSetService.return_value.count_synchronized_datasets.return_value = 10
         MockFeatureModelService.return_value.count_feature_models.return_value = 5
         MockDataSetService.return_value.total_dataset_downloads.return_value = 100
@@ -37,6 +32,7 @@ def test_dashboard_render_with_mocked_data(test_client):
         assert "50" in response_data, "total_feature_model_downloads not found in dashboard."
         assert "200" in response_data, "total_dataset_views not found in dashboard."
         assert "150" in response_data, "total_feature_model_views not found in dashboard."
+
 
 if __name__ == "__main__":
     unittest.main()
