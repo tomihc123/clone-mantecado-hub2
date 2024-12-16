@@ -14,18 +14,17 @@ class DepositionRepository(BaseRepository):
         Crea una nueva Deposition de Fakenodo
 
         Args:
-            metadata (dict, optional): Json o Diccionarion con metada de la deposición
-            doi (str, optional): El doi de la deposición
+            metadata (dict, optional): Json o Diccionario con metadata de la deposición
+            doi (str, optional): El DOI de la deposición
 
         Returns:
             Deposition: La deposición creada
         """
-        # Con esto vamos a impedr que un dtaset que aun no
-        # tenga metadata no se pueda subir a fakenodo
         if metadata is None:
             metadata = {}
 
-        depo = Deposition(metadata=metadata, doi=doi)
+        # Usamos `meta_data` para coincidir con el modelo
+        depo = Deposition(meta_data=metadata, doi=doi)
         db.session.add(depo)
         db.session.commit()
 
