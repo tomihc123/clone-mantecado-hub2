@@ -117,8 +117,13 @@ class DataSetRepository(BaseRepository):
     def download_all_datasets(self):
         try:
 
-            datasets = self.model.query.all()
-            return datasets
+            return (
+                self.model.query.join(DSMetaData)
+                .filter(DSMetaData.dataset_doi.isnot(None))
+                .order_by(self.model.created_at.desc())
+                .all()
+            )
+
         except Exception as e:
             # Manejo de excepciones
             print(f"Error al obtener los datasets: {e}")
