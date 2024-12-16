@@ -1,0 +1,30 @@
+name: Close Stale Issues and Pull Requests
+
+on:
+  schedule:
+    - cron: "0 0 * * 0" # Weekly
+  workflow_dispatch:
+
+jobs:
+  stale:
+    name: Mark and Close Stale Issues/PRs
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Run Stale Action
+      uses: actions/stale@v8
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
+        stale-issue-message: "This issue is inactive and will be automatically closed if no further activity occurs. Please comment to keep it open."
+        stale-pr-message: "This pull request is inactive and will be automatically closed if no further activity occurs. Please update or comment to keep it open."
+        days-before-stale: 30
+        days-before-close: 7
+        stale-issue-label: "stale"
+        exempt-issue-labels: "keep-open"
+        exempt-pr-labels: "do-not-close"
+        only-issues: false
+        remove-stale-when-updated: true
+
