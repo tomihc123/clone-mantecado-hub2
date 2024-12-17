@@ -15,7 +15,6 @@ El proyecto Mantecao-Hub tiene como objetivo mejorar y expandir la plataforma UV
 
 A través de este proyecto, buscamos facilitar la gestión de perfiles, validación de registros y una visualización más eficiente de la información. El enfoque es colaborativo, ágil y se organiza bajo una estructura de integración continua para cumplir con los hitos establecidos en cada fase del desarrollo.
 
-
 Toda la información importante relacionada con este proyecto, incluyendo documentación técnica, guías de uso, flujos de trabajo y procedimientos, está disponible en nuestra **[Wiki](https://github.com/Mantecado-hub/mantecado-hub-2/wiki)**.  
 
 Recomendamos visitar la Wiki para obtener detalles sobre  cómo contribuir y mucho más.
